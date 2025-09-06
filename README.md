@@ -10,7 +10,7 @@ Currently, two official plugins are available:
 ### Vercel link 
 
 ```bash
-https://alma-plum.vercel.app/
+http://explore-tau-snowy.vercel.app/
 ```
 
 ### How to login for see tasks(first task is form nav)

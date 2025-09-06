@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    base: process.env.VITE_BASE_PATH || "/explore",
+    base: process.env.VITE_BASE_PATH || "/",
     build: {
       commonjsOptions: { transformMixedEsModules: true },
     },

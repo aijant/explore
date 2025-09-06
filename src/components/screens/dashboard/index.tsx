@@ -1,53 +1,89 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import SteeringIcon from "@mui/icons-material/SettingsInputAntenna";
 import SignalWifiIcon from "@mui/icons-material/SignalWifi4Bar";
+import InputAdornment from "@mui/material/InputAdornment";
+import SearchIcon from "@mui/icons-material/Search";
+import { MapContainer, TileLayer } from "react-leaflet";
 
 const DashboardContent: FC = () => {
+  const [activeTab, setActiveTab] = useState<"vehicle" | "drivers" | "signal">("vehicle");
+
   return (
     <div className="flex w-full h-[calc(100vh_-_65px)] bg-[#4a525e] text-white">
       {/* Map Section */}
       <div className="flex-grow relative">
-        {/* Top Controls (optional) */}
+        {/* Top Controls */}
         <div className="absolute top-4 left-4 flex gap-2 z-10">
           <Button variant="contained" color="primary">
             Live Share
           </Button>
         </div>
 
-        {/* Map Placeholder */}
-        <div className="w-full h-full">
-          {/* Replace this with real Google Maps or Leaflet */}
-          <div className="w-full h-full flex justify-center items-center text-gray-400">
-            Map Placeholder
-          </div>
-        </div>
+        {/* Leaflet Map (Light Style) */}
+        <MapContainer
+          center={[39.8283, -98.5795]} // Center of the USA
+          zoom={5}
+          className="w-full h-full"
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          />
+        </MapContainer>
       </div>
 
       {/* Right Sidebar */}
-      <div className="w-[350px] border-r-1 border-[#ffffff1a] bg-[#121a20] border-gray-700 p-4 flex flex-col gap-4">
+      <div className="w-[350px] border-l border-[#ffffff1a] bg-[#121a20] p-[12px] flex flex-col">
         {/* Toggle Buttons */}
-        <div className="flex justify-between">
+        <div className="flex gap-[12px] mb-[12px]">
           <Button
-            variant="contained"
+            variant={activeTab === "vehicle" ? "contained" : "outlined"}
             color="primary"
+            fullWidth
             startIcon={<DirectionsCarIcon />}
+            onClick={() => setActiveTab("vehicle")}
+            sx={{
+              "& .MuiButton-startIcon": {
+                marginRight: "4px",
+              },
+              fontSize: "12px",
+              textTransform: "none",
+            }}
           >
             Vehicle
           </Button>
           <Button
-            variant="outlined"
+            variant={activeTab === "drivers" ? "contained" : "outlined"}
             color="primary"
+            fullWidth
             startIcon={<SteeringIcon />}
+            onClick={() => setActiveTab("drivers")}
+            sx={{
+              "& .MuiButton-startIcon": {
+                marginRight: "4px",
+              },
+              fontSize: "12px",
+              textTransform: "none",
+            }}
           >
-            Wheel
+            Drivers
           </Button>
           <Button
-            variant="outlined"
+            variant={activeTab === "signal" ? "contained" : "outlined"}
             color="primary"
             startIcon={<SignalWifiIcon />}
+            fullWidth
+            onClick={() => setActiveTab("signal")}
+            sx={{
+              "& .MuiButton-startIcon": {
+                marginRight: "4px",
+              },
+              fontSize: "12px",
+              textTransform: "none",
+            }}
           >
             Signal
           </Button>
@@ -60,21 +96,46 @@ const DashboardContent: FC = () => {
           placeholder="Search by Driver, Vehicle ID or Trailer ID"
           fullWidth
           InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: "white" }} />
+              </InputAdornment>
+            ),
             sx: {
               color: "white",
+              fontSize: "12px", // <-- this affects the input text
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "#334155" },
               "&:hover .MuiOutlinedInput-notchedOutline": {
                 borderColor: "#64748b",
               },
-              "& .MuiInputBase-input": { color: "white" },
+              "& .MuiInputBase-input": {
+                color: "white",
+                fontSize: "12px", // <-- this ensures the input text is small
+              },
             },
+          }}
+          InputLabelProps={{
+            sx: { fontSize: "12px" }, // optional: if you're using labels
           }}
         />
 
         {/* Filter Button */}
-        <Button variant="contained" color="secondary">
-          Filter
-        </Button>
+        <div className="mt-[16px]">
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{
+              "& .MuiButton-startIcon": {
+                marginRight: "4px",
+              },
+              fontSize: "12px",
+              textTransform: "none",
+            }}
+          >
+            Filter
+          </Button>
+        </div>
       </div>
     </div>
   );
