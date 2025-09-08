@@ -10,7 +10,9 @@ import { logOut, saveAuth } from "@store/slices/auth-slice";
 
 import { RootState } from "..";
 
-export const BASE_URL = import.meta.env.MODE === "development" ? "/api" : "/api";
+export const BASE_URL =
+  import.meta.env.MODE === "development" ? "" : "http://18.117.26.151";
+
 
 export const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
@@ -31,7 +33,7 @@ export const baseQueryWithReauth: BaseQueryFn<
     const refreshToken = (api.getState() as RootState).auth.refreshToken;
     const refreshResult = await baseQuery(
       {
-        url: "/jwtToken/auth/refresh",
+        url: "/auth/refresh",
         method: "POST",
         body: { refreshToken },
       },
