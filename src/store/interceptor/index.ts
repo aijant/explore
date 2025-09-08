@@ -11,7 +11,7 @@ import { logOut, saveAuth } from "@store/slices/auth-slice";
 import { RootState } from "..";
 
 export const BASE_URL =
-  import.meta.env.MODE === "development" ? "/api" : "/api";
+  import.meta.env.MODE === "development" ? "/api" : `${__API_URL__}`;
 
 export const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
