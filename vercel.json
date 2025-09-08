@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/jwtToken/:path*",
-      "destination": "http://18.117.26.151/jwtToken/:path*"
-    }
-  ]
-}
