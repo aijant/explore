@@ -33,7 +33,7 @@ export const baseQueryWithReauth: BaseQueryFn<
     const refreshToken = (api.getState() as RootState).auth.refreshToken;
     const refreshResult = await baseQuery(
       {
-        url: "/auth/refresh",
+        url: "/jwtToken/auth/refresh",
         method: "POST",
         body: { refreshToken },
       },

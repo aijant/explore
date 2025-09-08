@@ -9,7 +9,7 @@ export const accountApi = createApi({
   endpoints: (builder) => ({
     signIn: builder.mutation<any, IRequestSignIn>({
       query: (body) => ({
-        url: "/auth/login",
+        url: "/jwtToken/auth/login",
         method: "POST",
         body
       }),
