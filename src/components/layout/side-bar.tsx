@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
@@ -17,7 +17,6 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SearchIcon from "@mui/icons-material/Search";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-
 
 const NAV_LINKS = [
   {
@@ -60,12 +59,8 @@ const NAV_LINKS = [
 ];
 
 const SideBar: FC = () => {
-  const { pathname } = useLocation();
-  console.log(pathname);
-
   return (
     <aside className="w-[250px] min-h-screen flex flex-col text-white border-r-1 border-[#ffffff1a] ml-8">
-      {/* Logo Section */}
       <div className="flex items-center h-[64px] ml-[14px]">
         <img
           src="/logo.png"
@@ -76,8 +71,7 @@ const SideBar: FC = () => {
           EXPLORE
         </span>
       </div>
-
-      {/* Menu List */}
+      
       <List className="flex-1">
         {NAV_LINKS.map((nav) => (
           <NavLink
