@@ -9,20 +9,19 @@ import SearchIcon from "@mui/icons-material/Search";
 import { MapContainer, TileLayer } from "react-leaflet";
 
 const DashboardContent: FC = () => {
-  const [activeTab, setActiveTab] = useState<"vehicle" | "drivers" | "signal">("vehicle");
+  const [activeTab, setActiveTab] = useState<"vehicle" | "drivers" | "signal">(
+    "vehicle"
+  );
 
   return (
     <div className="flex w-full h-[calc(100vh_-_65px)] bg-[#4a525e] text-white">
-      {/* Map Section */}
       <div className="flex-grow relative">
-        {/* Top Controls */}
         <div className="absolute top-4 left-4 flex gap-2 z-10">
           <Button variant="contained" color="primary">
             Live Share
           </Button>
         </div>
 
-        {/* Leaflet Map (Light Style) */}
         <MapContainer
           center={[39.8283, -98.5795]} // Center of the USA
           zoom={5}
@@ -35,9 +34,7 @@ const DashboardContent: FC = () => {
         </MapContainer>
       </div>
 
-      {/* Right Sidebar */}
       <div className="w-[350px] border-l border-[#ffffff1a] bg-[#121a20] p-[12px] flex flex-col">
-        {/* Toggle Buttons */}
         <div className="flex gap-[12px] mb-[12px]">
           <Button
             variant={activeTab === "vehicle" ? "contained" : "outlined"}
@@ -89,7 +86,6 @@ const DashboardContent: FC = () => {
           </Button>
         </div>
 
-        {/* Search Input */}
         <TextField
           size="small"
           variant="outlined"
@@ -103,23 +99,22 @@ const DashboardContent: FC = () => {
             ),
             sx: {
               color: "white",
-              fontSize: "12px", // <-- this affects the input text
+              fontSize: "12px",
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "#334155" },
               "&:hover .MuiOutlinedInput-notchedOutline": {
                 borderColor: "#64748b",
               },
               "& .MuiInputBase-input": {
                 color: "white",
-                fontSize: "12px", // <-- this ensures the input text is small
+                fontSize: "12px",
               },
             },
           }}
           InputLabelProps={{
-            sx: { fontSize: "12px" }, // optional: if you're using labels
+            sx: { fontSize: "12px" },
           }}
         />
 
-        {/* Filter Button */}
         <div className="mt-[16px]">
           <Button
             variant="contained"

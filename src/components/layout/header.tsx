@@ -4,11 +4,12 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import useSignOut from "@hooks/useSignOut";
 
 const Header: FC = () => {
   const user = JSON.parse(localStorage.getItem("@auth") || "{}")?.user;
+  const { handleSignOut } = useSignOut();
 
-  // Account menu
   const [accountAnchorEl, setAccountAnchorEl] = useState<null | HTMLElement>(
     null
   );
@@ -22,7 +23,6 @@ const Header: FC = () => {
     setAccountAnchorEl(null);
   };
 
-  // Add menu
   const [addAnchorEl, setAddAnchorEl] = useState<null | HTMLElement>(null);
   const addMenuOpen = Boolean(addAnchorEl);
 
@@ -34,7 +34,6 @@ const Header: FC = () => {
     setAddAnchorEl(null);
   };
 
-  // Notifications popover
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
   const notificationsOpen = Boolean(notificationAnchorEl);
@@ -47,7 +46,6 @@ const Header: FC = () => {
     setNotificationAnchorEl(null);
   };
 
-  // Group menu
   const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
   const groupMenuOpen = Boolean(groupAnchorEl);
   const [selectedGroup, setSelectedGroup] = useState("All Groups");
@@ -74,7 +72,6 @@ const Header: FC = () => {
       </div>
 
       <div className="flex items-center gap-[8px]">
-        {/* Group Dropdown Button */}
         <Button
           onClick={handleGroupMenuOpen}
           endIcon={<ArrowDropDownIcon />}
@@ -118,7 +115,6 @@ const Header: FC = () => {
           </MenuItem>
         </Menu>
 
-        {/* "+" Button */}
         <Button variant="contained" color="primary" onClick={handleAddMenuOpen}>
           <AddIcon />
         </Button>
@@ -168,14 +164,12 @@ const Header: FC = () => {
             Notifications
           </Typography>
           <div style={{ minHeight: 150 }}>
-            {/* Placeholder area — map over notifications later */}
             <Typography variant="body2" color="gray">
               No new notifications.
             </Typography>
           </div>
         </Popover>
 
-        {/* Username */}
         {user?.id ? (
           <span className="text-[#fff]">
             {user.name} {user.surname}
@@ -184,7 +178,6 @@ const Header: FC = () => {
           <span className="text-[#fff]">Test Admin</span>
         )}
 
-        {/* Account menu */}
         <Button color="primary" onClick={handleAccountMenuOpen}>
           <AccountCircleIcon />
         </Button>
@@ -208,7 +201,7 @@ const Header: FC = () => {
           <MenuItem onClick={handleAccountMenuClose}>
             Manual Instruction
           </MenuItem>
-          <MenuItem onClick={handleAccountMenuClose}>Logout</MenuItem>
+          <MenuItem onClick={handleSignOut}>Logout</MenuItem>
         </Menu>
       </div>
     </header>
