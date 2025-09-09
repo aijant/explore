@@ -70,9 +70,10 @@ const ComplianceContent: React.FC = () => {
       sx={{
         bgcolor: "#121a26",
         color: "white",
-        height: "100vh",
+        minHeight: "100vh",
         p: 3,
-        fontFamily: "Roboto, sans-serif",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <Typography
