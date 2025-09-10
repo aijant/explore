@@ -16,7 +16,7 @@ import {
   TableContainer,
   Paper,
 } from "@mui/material";
-import { Refresh, Download } from "@mui/icons-material";
+import { Refresh } from "@mui/icons-material";
 
 interface Asset {
   vehicleId: string;

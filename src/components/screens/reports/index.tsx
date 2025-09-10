@@ -67,7 +67,7 @@ const gpsReports = {
 const ReportContent: React.FC = () => {
   const [tab, setTab] = useState(0);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTab(newValue);
   };
 
