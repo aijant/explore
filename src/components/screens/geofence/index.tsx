@@ -114,13 +114,15 @@ const GeofenceContent: React.FC = () => {
             variant="outlined"
             startIcon={<Add />}
             sx={{
-              color: "#fff",
-              borderColor: "#2e3c4d",
+              color: "#1669f2",
+              borderColor: "#1669f2",
               textTransform: "none",
-              bgcolor: "#1b2638",
+              fontWeight: 600,
+              fontSize: 13,
+              minWidth: 110,
               "&:hover": {
-                borderColor: "#3f4d61",
-                bgcolor: "#1f2d42",
+                bgcolor: "#1669f230",
+                borderColor: "#1669f2",
               },
             }}
           >

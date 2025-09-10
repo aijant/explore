@@ -173,15 +173,18 @@ const MaintenanceContent = () => {
         </Button>
 
         <Button
-          variant="contained"
+          variant="outlined"
           sx={{
-            textTransform: "uppercase",
-            fontWeight: 700,
+            color: "#1669f2",
+            borderColor: "#1669f2",
+            textTransform: "none",
+            fontWeight: 600,
             fontSize: 13,
-            bgcolor: "#1669f2",
-            minWidth: 90,
-            "&:hover": { bgcolor: "#144fc7" },
-            ml: 1,
+            minWidth: 110,
+            "&:hover": {
+              bgcolor: "#1669f230",
+              borderColor: "#1669f2",
+            },
           }}
         >
           Export

@@ -263,11 +263,16 @@ const AdminContent = () => {
                   </Stack>
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>{driver.cycle}</TableCell>
-                <TableCell>
-                  <AppleIcon />
-                </TableCell>
                 <TableCell sx={{ color: "white" }}>
-                  {driver.mobileApp}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      alignItems: "center",
+                    }}
+                  >
+                    <AppleIcon /> {driver.mobileApp}
+                  </Box>
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>
                   {driver.createdOn}

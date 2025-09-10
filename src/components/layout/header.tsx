@@ -115,7 +115,19 @@ const Header: FC = () => {
           </MenuItem>
         </Menu>
 
-        <Button variant="contained" color="primary" onClick={handleAddMenuOpen}>
+        <Button
+          variant="outlined"
+          onClick={handleAddMenuOpen}
+          sx={{
+            color: "#1669f2",
+            borderColor: "#1669f2",
+            minWidth: 50,
+            "&:hover": {
+              bgcolor: "#1669f230",
+              borderColor: "#1669f2",
+            },
+          }}
+        >
           <AddIcon />
         </Button>
         <Menu

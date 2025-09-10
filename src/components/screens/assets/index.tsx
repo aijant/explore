@@ -146,16 +146,18 @@ const AssetsContent: React.FC = () => {
             </Select>
           </FormControl>
           <Button
-            variant="contained"
-            startIcon={<Download />}
+            variant="outlined"
             sx={{
-              textTransform: "uppercase",
-              fontWeight: "700",
-              fontSize: 12,
-              px: 2,
-              height: 36,
-              bgcolor: "#1669f2",
-              "&:hover": { bgcolor: "#144fc7" },
+              color: "#1669f2",
+              borderColor: "#1669f2",
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: 13,
+              minWidth: 110,
+              "&:hover": {
+                bgcolor: "#1669f230",
+                borderColor: "#1669f2",
+              },
             }}
           >
             Export

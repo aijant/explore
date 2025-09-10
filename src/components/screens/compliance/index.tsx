@@ -192,15 +192,19 @@ const ComplianceContent: React.FC = () => {
         </FormControl>
 
         <Button
-          variant="contained"
-          color="primary"
+          variant="outlined"
           startIcon={<Download />}
           sx={{
-            textTransform: "uppercase",
-            fontWeight: "700",
-            fontSize: 12,
-            px: 2,
-            height: 36,
+            color: "#1669f2",
+            borderColor: "#1669f2",
+            textTransform: "none",
+            fontWeight: 600,
+            fontSize: 13,
+            minWidth: 110,
+            "&:hover": {
+              bgcolor: "#1669f230",
+              borderColor: "#1669f2",
+            },
           }}
         >
           Download
