@@ -61,7 +61,11 @@ const NAV_LINKS = [
 const SideBar: FC = () => {
   return (
     <aside className="w-[250px] min-h-screen flex flex-col text-white border-r-1 border-[#ffffff1a] ml-8">
-      <div className="flex items-center h-[64px] ml-[14px]">
+      <NavLink
+        key="99iii"
+        to={ROUTES.dashboard}
+        className="flex items-center h-[64px] ml-[14px]"
+      >
         <img
           src="/logo.png"
           alt="EXplore"
@@ -70,8 +74,8 @@ const SideBar: FC = () => {
         <span className="font-bold text-lg leading-none text-[#fff]">
           EXPLORE
         </span>
-      </div>
-      
+      </NavLink>
+
       <List className="flex-1">
         {NAV_LINKS.map((nav) => (
           <NavLink

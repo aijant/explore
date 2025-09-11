@@ -5,7 +5,7 @@ import { Navigate, Outlet } from "react-router-dom";
 interface IProps extends PropsWithChildren {}
 
 const ProtectedRoute: FC<IProps> = () => {
-  const isAuth = true; //JSON.parse(localStorage.getItem("@auth") || "{}")?.isAuth;
+  const isAuth = JSON.parse(localStorage.getItem("@auth") || "{}")?.isAuth;
 
   console.log("@auth", isAuth);
 
