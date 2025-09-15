@@ -67,12 +67,12 @@ const SideBar: FC = () => {
         className="flex items-center h-[64px] ml-[14px]"
       >
         <img
-          src="/logo.png"
-          alt="EXplore"
-          className="w-[42px] object-contain"
+          src="/orkhan_trans.png"
+          alt="Orkan ELD"
+          className="w-[72px] object-contain"
         />
-        <span className="font-bold text-lg leading-none text-[#fff]">
-          EXPLORE
+        <span className="font-bold text-lg leading-none text-[#fff] mt-[12px]">
+          Orkan ELD
         </span>
       </NavLink>
 

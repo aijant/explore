@@ -57,9 +57,8 @@ const AuthContent: FC = () => {
     <div className="w-screen h-screen flex">
       <div className="w-full md:w-1/2 bg-[#1b242c] text-white flex items-center justify-center px-6">
         <Box sx={{ width: "100%", maxWidth: 360 }}>
-     
           <div className="flex justify-center mb-4">
-            <img src="/logo.png" alt="Xplore ELD" className="w-[112px]" />
+            <img src="/logo.png" alt="Orkan ELD" className="w-[112px]" />
           </div>
 
           <Typography
@@ -71,7 +70,6 @@ const AuthContent: FC = () => {
           </Typography>
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            
             <TextField
               label="Email"
               placeholder="Enter email"
@@ -167,7 +165,7 @@ const AuthContent: FC = () => {
             align="center"
             sx={{ mt: 3, color: "#aaa", fontSize: "0.85rem" }}
           >
-            © 2025 Explore. All Rights Reserved
+            © 2025 Orkan ELD. All Rights Reserved
           </Typography>
         </Box>
       </div>

@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       proxy: {
         "/api": {
-          target: "http://18.117.26.151", // backend server
+          target: "https://cloud.orkancorp.com", // backend server
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/api/, ""),
         },

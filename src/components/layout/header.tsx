@@ -66,9 +66,6 @@ const Header: FC = () => {
   return (
     <header className="h-[65px] flex items-center justify-between px-6 text-white border-b border-[#ffffff1a] bg-[#121212]">
       <div className="flex items-center">
-        <span className="font-semibold text-[#fff] ml-[24px]">
-          Company name
-        </span>
       </div>
 
       <div className="flex items-center gap-[8px]">
