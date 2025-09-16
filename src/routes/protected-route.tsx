@@ -7,8 +7,6 @@ interface IProps extends PropsWithChildren {}
 const ProtectedRoute: FC<IProps> = () => {
   const isAuth = JSON.parse(localStorage.getItem("@auth") || "{}")?.isAuth;
 
-  console.log("@auth", isAuth);
-
   return isAuth ? <Outlet /> : <Navigate to={ROUTES.auth} />;
 };
 

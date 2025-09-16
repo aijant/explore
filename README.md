@@ -13,7 +13,7 @@ Currently, two official plugins are available:
 http://explore-tau-snowy.vercel.app/
 ```
 
-### How to login for see tasks(first task is form nav)
+### How to login
 
 email 
 password
