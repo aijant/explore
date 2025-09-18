@@ -11,26 +11,28 @@ import PageEldEvents from "@pages/eld-events";
 import PageGeofence from "@pages/geofence";
 import PageDispatch from "@pages/dispatch";
 import PageLoads from "@pages/loads";
+import PageDocuments from "@pages/documents";
 import PageReports from "@pages/reports";
 import PageAdmin from "@pages/admin";
-import { Route, Routes } from 'react-router-dom'
-import ProtectedRoute from './protected-route'
+import { Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./protected-route";
 
 const {
-    auth,
-    dashboard,
-    compliance,
-    safety,
-    location,
-    assets,
-    maintenance,
-    eldEvents,
-    geofence,
-    dispatch,
-    loads,
-    reports,
-    admin
-} = ROUTES
+  auth,
+  dashboard,
+  compliance,
+  safety,
+  location,
+  assets,
+  maintenance,
+  eldEvents,
+  geofence,
+  dispatch,
+  loads,
+  documents,
+  reports,
+  admin,
+} = ROUTES;
 
 const AppRoute = () => {
   return (
@@ -50,12 +52,13 @@ const AppRoute = () => {
           <Route path={geofence} element={<PageGeofence />} />
           <Route path={dispatch} element={<PageDispatch />} />
           <Route path={loads} element={<PageLoads />} />
+          <Route path={documents} element={<PageDocuments />} />
           <Route path={reports} element={<PageReports />} />
           <Route path={admin} element={<PageAdmin />} />
         </Route>
       </Route>
     </Routes>
   );
-}
+};
 
 export default AppRoute

@@ -14,6 +14,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import MapIcon from "@mui/icons-material/Map";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import DocumentScanner from "@mui/icons-material/InsertDriveFile";
 import SearchIcon from "@mui/icons-material/Search";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -47,6 +48,12 @@ const NAV_LINKS = [
     href: ROUTES.dispatch,
     icon: <LocalShippingIcon />,
     id: 9,
+  },
+  {
+    label: "Documents",
+    href: ROUTES.documents,
+    icon: <DocumentScanner />,
+    id: 13,
   },
   { label: "Loads", href: ROUTES.loads, icon: <SearchIcon />, id: 10 },
   { label: "Reports", href: ROUTES.reports, icon: <AssessmentIcon />, id: 11 },
