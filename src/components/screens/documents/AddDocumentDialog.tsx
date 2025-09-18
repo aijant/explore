@@ -11,6 +11,7 @@ import {
   Select,
   MenuItem,
   Typography,
+  OutlinedInput,
 } from "@mui/material";
 
 const AddDocumentDialog = ({
@@ -29,6 +30,12 @@ const AddDocumentDialog = ({
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
+  const [errors, setErrors] = useState({
+    type: false,
+    dateTime: false,
+    vehicleId: false,
+  });
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
@@ -42,24 +49,56 @@ const AddDocumentDialog = ({
     setReference("");
     setNotes("");
     setFile(null);
+    setErrors({ type: false, dateTime: false, vehicleId: false });
   };
 
   const handleSubmit = () => {
-    if (!type || !dateTime || !vehicleId) {
-      alert("Please fill all required fields.");
-      return;
-    }
-      onConfirm({ type, dateTime, vehicleId, reference, notes, file });
-      resetForm();
+    const newErrors = {
+      type: !type,
+      dateTime: !dateTime,
+      vehicleId: !vehicleId,
+    };
+
+    setErrors(newErrors);
+
+    const hasErrors = Object.values(newErrors).some(Boolean);
+    if (hasErrors) return;
+
+    onConfirm({ type, dateTime, vehicleId, reference, notes, file });
+    resetForm();
+  };
+
+  const selectMenuProps = {
+    PaperProps: {
+      sx: {
+        bgcolor: "#1e2630",
+        color: "white",
+        "& .MuiMenuItem-root": {
+          color: "white",
+          "&:hover": {
+            backgroundColor: "#2a3442",
+          },
+        },
+      },
+    },
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={() => {
+        resetForm();
+        onClose();
+      }}
+      maxWidth="sm"
+      fullWidth
+    >
       <DialogTitle
         sx={{ fontWeight: "bold", bgcolor: "#121a26", color: "white" }}
       >
         Add Document
       </DialogTitle>
+
       <DialogContent dividers sx={{ bgcolor: "#121a26", color: "white" }}>
         <Typography
           variant="subtitle2"
@@ -68,13 +107,19 @@ const AddDocumentDialog = ({
           DOCUMENT INFO
         </Typography>
 
+        {/* Company */}
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel sx={{ color: "white" }}>Company</InputLabel>
           <Select
             value={"Orkan ELD"}
+            input={<OutlinedInput label="Company" />}
+            MenuProps={selectMenuProps}
             sx={{
               bgcolor: "#1e2630",
               color: "white",
+              ".Mui-disabled": {
+                WebkitTextFillColor: "white",
+              },
               ".MuiSelect-icon": { color: "white" },
             }}
           >
@@ -82,56 +127,78 @@ const AddDocumentDialog = ({
           </Select>
         </FormControl>
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
+        {/* Type */}
+        <FormControl fullWidth sx={{ mb: 2 }} error={errors.type}>
           <InputLabel sx={{ color: "white" }}>Type *</InputLabel>
           <Select
             value={type}
             onChange={(e) => setType(e.target.value)}
+            MenuProps={selectMenuProps}
             sx={{
               bgcolor: "#1e2630",
               color: "white",
               ".MuiSelect-icon": { color: "white" },
             }}
           >
-            <MenuItem value="">Select Type</MenuItem>
             <MenuItem value="Scale Ticket">Scale Ticket</MenuItem>
             <MenuItem value="Other">Other</MenuItem>
           </Select>
+          {errors.type && (
+            <Typography variant="caption" color="error">
+              Type is required
+            </Typography>
+          )}
         </FormControl>
 
+        {/* Date/Time */}
         <TextField
           label="Date/Time *"
           type="datetime-local"
           value={dateTime}
           onChange={(e) => setDateTime(e.target.value)}
           fullWidth
-          sx={{ mb: 2 }}
-          InputLabelProps={{
-            shrink: true,
-            sx: { color: "white" },
+          sx={{
+            mb: 2,
+            "& .MuiInputBase-root": {
+              color: "white",
+              backgroundColor: "#1e2630",
+            },
+            "& .MuiInputLabel-root": {
+              color: "white",
+            },
+            "& .MuiSvgIcon-root": {
+              color: "white",
+            },
           }}
-          inputProps={{
-            style: { color: "white", backgroundColor: "#1e2630" },
-          }}
+          error={errors.dateTime}
+          helperText={errors.dateTime ? "Date/Time is required" : ""}
+          InputLabelProps={{ shrink: true }}
         />
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
+        {/* Vehicle ID */}
+        <FormControl fullWidth sx={{ mb: 2 }} error={errors.vehicleId}>
           <InputLabel sx={{ color: "white" }}>Vehicle ID *</InputLabel>
           <Select
             value={vehicleId}
             onChange={(e) => setVehicleId(e.target.value)}
+            MenuProps={selectMenuProps}
             sx={{
               bgcolor: "#1e2630",
               color: "white",
               ".MuiSelect-icon": { color: "white" },
             }}
           >
-            <MenuItem value="">Select Vehicle</MenuItem>
             <MenuItem value="008">008</MenuItem>
             <MenuItem value="009">009</MenuItem>
           </Select>
+          {errors.vehicleId && (
+            <Typography variant="caption" color="error">
+              Vehicle ID is required
+            </Typography>
+          )}
         </FormControl>
 
+        {/* Reference */}
         <TextField
           label="Reference"
           value={reference}
@@ -139,9 +206,12 @@ const AddDocumentDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
+        {/* Notes */}
         <TextField
           label="Notes"
           value={notes}
@@ -151,9 +221,12 @@ const AddDocumentDialog = ({
           rows={3}
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
+        {/* File Upload */}
         <Button
           variant="outlined"
           component="label"
@@ -178,6 +251,8 @@ const AddDocumentDialog = ({
           </Typography>
         )}
       </DialogContent>
+
+      {/* Actions */}
       <DialogActions sx={{ bgcolor: "#121a26" }}>
         <Button
           onClick={() => {

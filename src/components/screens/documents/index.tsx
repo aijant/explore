@@ -114,7 +114,7 @@ const DocumentsContent = () => {
                     borderRadius: 1,
                     input: { color: "white" },
                     label: { color: "white" },
-                    svg: { color: "white" }, // ⬅️ Make calendar icon white
+                    svg: { color: "white" },
                   },
                 },
               }}
@@ -135,7 +135,7 @@ const DocumentsContent = () => {
                     borderRadius: 1,
                     input: { color: "white" },
                     label: { color: "white" },
-                    svg: { color: "white" }, // ⬅️ Make calendar icon white
+                    svg: { color: "white" },
                   },
                 },
               }}
