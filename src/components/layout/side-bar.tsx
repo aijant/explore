@@ -131,15 +131,21 @@ const SideBar: FC = () => {
                 >
                   {({ isActive }) => (
                     <ListItemButton className="px-6 py-2">
-                      <div className="flex items-center gap-[14px] text-white">
+                      <div
+                        className={`flex items-center gap-[14px] ${
+                          isActive ? "text-white" : "text-white/70"
+                        }`}
+                      >
                         <span className="text-xl">
                           {React.cloneElement(nav.icon, {
-                            sx: { color: "white" },
+                            sx: { color: isActive ? "white" : "#ccc" },
                           })}
                         </span>
                         <ListItemText
                           primary={nav.label}
-                          primaryTypographyProps={{ style: { color: "white" } }}
+                          primaryTypographyProps={{
+                            style: { color: isActive ? "white" : "#ccc" },
+                          }}
                         />
                       </div>
                     </ListItemButton>
@@ -186,11 +192,16 @@ const SideBar: FC = () => {
                           }
                         >
                           {({ isActive }) => (
-                            <ListItemButton sx={{ pl: 8 }}>
+                            <ListItemButton
+                              sx={{
+                                pl: 8,
+                                bgcolor: isActive ? "#4a525e69" : "inherit",
+                              }}
+                            >
                               <ListItemText
                                 primary={child.label}
                                 primaryTypographyProps={{
-                                  style: { color: "white" },
+                                  style: { color: isActive ? "white" : "#ccc" },
                                 }}
                               />
                             </ListItemButton>
