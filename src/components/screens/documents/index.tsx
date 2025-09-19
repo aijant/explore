@@ -219,7 +219,7 @@ const DocumentsContent = () => {
                 fontWeight: 600,
                 fontSize: 13,
                 minWidth: 110,
-                height: 35,
+                height: 38,
                 "&:hover": {
                   bgcolor: "#1669f230",
                   borderColor: "#1669f2",

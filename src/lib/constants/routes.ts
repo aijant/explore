@@ -13,4 +13,5 @@ export const ROUTES = {
   reports: "/reports",
   admin: "/admin",
   documents: "/documents",
+  adminVehicles: "/admin/vehicles",
 };

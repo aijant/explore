@@ -14,6 +14,7 @@ import PageLoads from "@pages/loads";
 import PageDocuments from "@pages/documents";
 import PageReports from "@pages/reports";
 import PageAdmin from "@pages/admin";
+import PageAdminVehicles from "@pages/admin/AdminVehicles";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./protected-route";
 
@@ -32,6 +33,7 @@ const {
   documents,
   reports,
   admin,
+  adminVehicles,
 } = ROUTES;
 
 const AppRoute = () => {
@@ -55,6 +57,7 @@ const AppRoute = () => {
           <Route path={documents} element={<PageDocuments />} />
           <Route path={reports} element={<PageReports />} />
           <Route path={admin} element={<PageAdmin />} />
+          <Route path={adminVehicles} element={<PageAdminVehicles />} />
         </Route>
       </Route>
     </Routes>
