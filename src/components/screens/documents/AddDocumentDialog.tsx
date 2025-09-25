@@ -13,6 +13,9 @@ import {
   Typography,
   OutlinedInput,
 } from "@mui/material";
+import { useGetVehiclesQuery } from "@store/services/vehicles.service";
+import { DocumentType } from "@store/models/enums/general.enums"; // update path as needed
+
 
 const AddDocumentDialog = ({
   open,
@@ -23,7 +26,7 @@ const AddDocumentDialog = ({
   onClose: () => void;
   onConfirm: (data: any) => void;
 }) => {
-  const [type, setType] = useState("");
+  const [type, setType] = useState<DocumentType | "">("");
   const [dateTime, setDateTime] = useState("");
   const [vehicleId, setVehicleId] = useState("");
   const [reference, setReference] = useState("");
@@ -35,6 +38,13 @@ const AddDocumentDialog = ({
     dateTime: false,
     vehicleId: false,
   });
+
+  const { data: vehiclesData } =
+    useGetVehiclesQuery({
+      page: 0,
+      size: 10,
+      vehicleId: "TRK",
+    });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -132,7 +142,7 @@ const AddDocumentDialog = ({
           <InputLabel sx={{ color: "white" }}>Type *</InputLabel>
           <Select
             value={type}
-            onChange={(e) => setType(e.target.value)}
+            onChange={(e) => setType(e.target.value as DocumentType)}
             MenuProps={selectMenuProps}
             sx={{
               bgcolor: "#1e2630",
@@ -140,8 +150,11 @@ const AddDocumentDialog = ({
               ".MuiSelect-icon": { color: "white" },
             }}
           >
-            <MenuItem value="Scale Ticket">Scale Ticket</MenuItem>
-            <MenuItem value="Other">Other</MenuItem>
+            {Object.values(DocumentType).map((docType) => (
+              <MenuItem key={docType} value={docType}>
+                {docType}
+              </MenuItem>
+            ))}
           </Select>
           {errors.type && (
             <Typography variant="caption" color="error">
@@ -188,8 +201,11 @@ const AddDocumentDialog = ({
               ".MuiSelect-icon": { color: "white" },
             }}
           >
-            <MenuItem value="008">008</MenuItem>
-            <MenuItem value="009">009</MenuItem>
+            {vehiclesData?.content?.map((item: any) => (
+              <MenuItem key={item.uuid} value={item.uuid}>
+                {item.vehicleId}
+              </MenuItem>
+            ))}
           </Select>
           {errors.vehicleId && (
             <Typography variant="caption" color="error">

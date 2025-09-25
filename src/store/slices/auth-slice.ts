@@ -1,4 +1,6 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+// src/store/slices/auth-slice.ts
+
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IAuthResponse } from "@store/models/interfaces/account.interfaces";
 
 enum StorageKeys {
@@ -11,6 +13,7 @@ export type TAuth = {
   refreshToken: string | null;
 };
 
+// Load authentication data from localStorage if available
 const authFromStorage = JSON.parse(
   localStorage.getItem(StorageKeys.TOKEN) || "{}"
 );
@@ -38,7 +41,7 @@ export const authSlice = createSlice({
       state.isAuth = false;
       state.accessToken = null;
       state.refreshToken = null;
-      localStorage.removeItem(StorageKeys.TOKEN);
+      localStorage.removeItem(StorageKeys.TOKEN); // Clear from localStorage
     },
   },
 });

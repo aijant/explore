@@ -6,12 +6,25 @@ export const vehiclesApi = createApi({
   tagTypes: ["vehicles"],
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    getVehicles: builder.query<any, any>({
-      query: (body) => ({
-        url: "/vehicles-with-doc",
-        method: "POST",
-        body,
-      }),
+    getVehicles: builder.query<
+      any,
+      { page?: number; size?: number; vehicleId?: string }
+    >({
+      query: (params = {}) => {
+        const query = new URLSearchParams();
+        
+        if (params.vehicleId) query.append("vehicleId", params.vehicleId);
+        if (params.page !== undefined)
+          query.append("page", params.page.toString());
+        if (params.size !== undefined)
+          query.append("size", params.size.toString());
+      
+
+        return {
+          url: `/vehicles?${query.toString()}`,
+          method: "GET",
+        };
+      },
     }),
   }),
 });

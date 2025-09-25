@@ -19,6 +19,7 @@
     "@reduxjs/toolkit": "^2.9.0",
     "@types/react-leaflet": "^2.8.3",
     "date-fns": "^4.1.0",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
