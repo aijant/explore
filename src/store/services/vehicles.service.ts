@@ -12,7 +12,7 @@ export const vehiclesApi = createApi({
     >({
       query: (params = {}) => {
         const query = new URLSearchParams();
-        
+
         if (params.vehicleId) query.append("vehicleId", params.vehicleId);
         if (params.page !== undefined)
           query.append("page", params.page.toString());
@@ -21,7 +21,7 @@ export const vehiclesApi = createApi({
       
 
         return {
-          url: `/vehicles?${query.toString()}`,
+          url: `/api/vehicles?${query.toString()}`,
           method: "GET",
         };
       },

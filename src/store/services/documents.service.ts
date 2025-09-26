@@ -12,7 +12,7 @@ export const documentsApi = createApi({
   endpoints: (builder) => ({
     getDocuments: builder.query<IDocumentsResponse[], IDocumentFilter>({
       query: (params) => ({
-        url: "/documents",
+        url: "/api/documents",
         method: "POST",
         body: params,
       }),
