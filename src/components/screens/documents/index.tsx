@@ -24,7 +24,12 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import { useGetDocumentsQuery } from "@store/services/documents.service";
+import {
+  useGetDocumentsQuery,
+  useCreateDocumentMutation,
+} from "@store/services/documents.service";
+import toast from "react-hot-toast";
+
 import AddDocumentDialog from "./AddDocumentDialog";
 // Sample documents
 const docs = [
@@ -56,21 +61,35 @@ const DocumentsContent = () => {
   const [vehicleFilter, setVehicleFilter] = useState("All");
   const [typeFilter, setTypeFilter] = useState("All");
 
+  const [createDocument] = useCreateDocumentMutation();
+  const { refetch } = useGetDocumentsQuery({}, { skip: true });
+
   const [dialogOpen, setDialogOpen] = useState(false);
-  const handleAddDocument = (docData: any) => {
-    console.log("Add document data:", docData);
-    setDialogOpen(false);
-    // TODO: Send docData to API
+
+  const handleAddDocument = async (docData: any) => {
+    try {
+      const formData = new FormData();
+      formData.append("userUuid", docData.userUuid);
+      formData.append("type", docData.type);
+      formData.append("date", docData.date);
+      formData.append("reference", docData.reference);
+      formData.append("notes", docData.notes || "");
+
+      if (docData.fileUrl instanceof File) {
+        formData.append("fileUrl", docData.file);
+      } else {
+        throw new Error("Invalid file format: must be File object");
+      }
+
+      await createDocument(formData).unwrap(); // <-- assumes RTK Query
+      toast.success("Документ успешно сохранён");
+      refetch();
+      setDialogOpen(false);
+    } catch (err: any) {
+      toast.error("Ошибка при сохранении документа");
+      console.error(err);
+    }
   };
-
-  const { data: allDocuments = [] } = useGetDocumentsQuery({
-    fromDate: fromDate?.toISOString(),
-    toDate: toDate?.toISOString(),
-    type: typeFilter !== "All" ? typeFilter : undefined,
-    vehicle: vehicleFilter !== "All" ? vehicleFilter : undefined,
-  });
-
-  console.log("allDocuments", allDocuments);
 
   const filteredDocs = docs.filter((d) => {
     const matchesVehicle =
@@ -228,7 +247,7 @@ const DocumentsContent = () => {
             >
               Export
             </Button>
-            <IconButton sx={{ color: "white", mb:'14px' }}>
+            <IconButton sx={{ color: "white", mb: "14px" }}>
               <RefreshIcon />
             </IconButton>
           </Box>

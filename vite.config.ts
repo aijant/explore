@@ -31,13 +31,7 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       strictPort: true,
       host: true,
-      proxy: {
-        "/api": {
-          target: "https://cloud.orkancorp.com", // backend server
-          changeOrigin: true,
-          rewrite: (p) => p.replace(/^\/api/, ""),
-        },
-      },
+      // 🔴 proxy убран
     },
     define: {
       __API_URL__: JSON.stringify(env.VITE_API_URL),

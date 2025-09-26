@@ -17,7 +17,7 @@ export const BASE_URL = `${__API_URL__}`;
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   prepareHeaders: async (headers, api) => {
-    headers.set("Content-Type", "application/json");
+    // headers.set("Content-Type", "application/json");
 
     const token = (api.getState() as RootState).auth.accessToken;
 

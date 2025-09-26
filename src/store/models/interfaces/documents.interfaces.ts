@@ -5,12 +5,12 @@ export interface IDocumentFilter {
   vehicle?: string;
 }
 
-export interface IDocumentsResponse {
+export interface IDocuments {
   id: string;
   userUuid: string;
   type: string;
   date: string;
   reference: string;
   notes: string;
-  fileUrl: string;
+  fileUrl: any;
 }

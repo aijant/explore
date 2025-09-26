@@ -16,7 +16,6 @@ import {
 import { useGetVehiclesQuery } from "@store/services/vehicles.service";
 import { DocumentType } from "@store/models/enums/general.enums"; // update path as needed
 
-
 const AddDocumentDialog = ({
   open,
   onClose,
@@ -39,12 +38,11 @@ const AddDocumentDialog = ({
     vehicleId: false,
   });
 
-  const { data: vehiclesData } =
-    useGetVehiclesQuery({
-      page: 0,
-      size: 10,
-      vehicleId: "TRK",
-    });
+  const { data: vehiclesData } = useGetVehiclesQuery({
+    page: 0,
+    size: 10,
+    vehicleId: "TRK",
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -68,13 +66,19 @@ const AddDocumentDialog = ({
       dateTime: !dateTime,
       vehicleId: !vehicleId,
     };
-
     setErrors(newErrors);
+    if (Object.values(newErrors).some(Boolean)) return;
 
-    const hasErrors = Object.values(newErrors).some(Boolean);
-    if (hasErrors) return;
+    const document = {
+      userUuid: vehicleId,
+      type,
+      date: dateTime.split("T")[0],
+      reference,
+      notes,
+      fileUrl: file,
+    };
 
-    onConfirm({ type, dateTime, vehicleId, reference, notes, file });
+    onConfirm(document);
     resetForm();
   };
 

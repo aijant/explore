@@ -1,8 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "../interceptor";
 import {
-  IDocumentsResponse,
-  IDocumentFilter,
+  IDocuments,
 } from "../models/interfaces/documents.interfaces";
 
 export const documentsApi = createApi({
@@ -10,14 +9,26 @@ export const documentsApi = createApi({
   tagTypes: ["documents"],
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    getDocuments: builder.query<IDocumentsResponse[], IDocumentFilter>({
+    getDocuments: builder.query<IDocuments, any>({
       query: (params) => ({
         url: "/api/documents",
         method: "POST",
         body: params,
       }),
+      providesTags: ["documents"],
+    }),
+
+    // создать документ
+    createDocument: builder.mutation<IDocuments, any>({
+      query: (body) => ({
+        url: "/api/documents", 
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["documents"],
     }),
   }),
 });
 
-export const { useGetDocumentsQuery } = documentsApi;
+export const { useGetDocumentsQuery, useCreateDocumentMutation } = documentsApi;
+
