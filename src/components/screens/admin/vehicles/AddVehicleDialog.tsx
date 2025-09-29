@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Dialog,
@@ -45,7 +45,7 @@ const AddVehicleDialog = ({
   const [gpsDevices, setGpsDevices] = useState<string[]>([""]);
   const [tabletSn, setTabletSn] = useState("");
   const [cameraSn, setCameraSn] = useState("");
-  const [dvirForm, setDvirForm] = useState("Default");
+  const [dvirForm, setDvirForm] = useState("");
 
   // REPORTS
   const [fleetDistance, setFleetDistance] = useState<"default" | "custom">(
@@ -53,7 +53,27 @@ const AddVehicleDialog = ({
   );
   const [customValue, setCustomValue] = useState("");
 
+  // DOCUMENTS
+  const [documents, setDocuments] = useState<string[]>([]);
+
+  // ERRORS
+  const [errors, setErrors] = useState<any>({});
+
+  const validate = () => {
+    const newErrors: any = {};
+    if (!vehicleId) newErrors.vehicleId = "Vehicle ID is required";
+    if (!vin) newErrors.vin = "VIN is required";
+    if (!fuelType) newErrors.fuelType = "Fuel type is required";
+    if (!company) newErrors.company = "Company is required";
+    if (!dvirForm) newErrors.dvirForm = "DVIR form is required";
+    if (fleetDistance === "custom" && !customValue)
+      newErrors.customValue = "Custom value required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = () => {
+    if (!validate()) return;
     const data = {
       vehicleId,
       vin,
@@ -73,6 +93,7 @@ const AddVehicleDialog = ({
       dvirForm,
       fleetDistance,
       customValue,
+      documents,
     };
     onConfirm(data);
   };
@@ -83,13 +104,9 @@ const AddVehicleDialog = ({
     setGpsDevices(updated);
   };
 
-  const addGpsDevice = () => {
-    setGpsDevices([...gpsDevices, ""]);
-  };
-
-  const removeGpsDevice = (index: number) => {
+  const addGpsDevice = () => setGpsDevices([...gpsDevices, ""]);
+  const removeGpsDevice = (index: number) =>
     setGpsDevices(gpsDevices.filter((_, i) => i !== index));
-  };
 
   const selectMenuProps = {
     PaperProps: {
@@ -121,26 +138,39 @@ const AddVehicleDialog = ({
           GENERAL
         </Typography>
 
+        {/* Vehicle ID */}
         <TextField
-          label="Vehicle ID *"
+          label="Vehicle ID"
+          required
           value={vehicleId}
           onChange={(e) => setVehicleId(e.target.value)}
+          error={!!errors.vehicleId}
+          helperText={errors.vehicleId}
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
+        {/* VIN */}
         <TextField
-          label="VIN *"
+          label="VIN"
+          required
           value={vin}
           onChange={(e) => setVin(e.target.value)}
+          error={!!errors.vin}
+          helperText={errors.vin}
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
+        {/* Year */}
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel sx={{ color: "white" }}>Year</InputLabel>
           <Select
@@ -158,6 +188,7 @@ const AddVehicleDialog = ({
           </Select>
         </FormControl>
 
+        {/* Make */}
         <TextField
           label="Make"
           value={make}
@@ -165,9 +196,12 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
+        {/* Model */}
         <TextField
           label="Model"
           value={model}
@@ -175,9 +209,12 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
+        {/* Color */}
         <TextField
           label="Color"
           value={color}
@@ -185,11 +222,16 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Fuel Type *</InputLabel>
+        {/* Fuel Type */}
+        <FormControl fullWidth sx={{ mb: 2 }} error={!!errors.fuelType}>
+          <InputLabel sx={{ color: "white" }} required>
+            Fuel Type
+          </InputLabel>
           <Select
             value={fuelType}
             onChange={(e) => setFuelType(e.target.value)}
@@ -200,8 +242,14 @@ const AddVehicleDialog = ({
             <MenuItem value="Gasoline">Gasoline</MenuItem>
             <MenuItem value="Electric">Electric</MenuItem>
           </Select>
+          {errors.fuelType && (
+            <Typography color="error" sx={{ fontSize: 12, mt: 0.5 }}>
+              {errors.fuelType}
+            </Typography>
+          )}
         </FormControl>
 
+        {/* License State */}
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel sx={{ color: "white" }}>License Issuing State</InputLabel>
           <Select
@@ -216,6 +264,7 @@ const AddVehicleDialog = ({
           </Select>
         </FormControl>
 
+        {/* License Plate */}
         <TextField
           label="License Plate Number"
           value={licensePlate}
@@ -223,11 +272,16 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Company *</InputLabel>
+        {/* Company */}
+        <FormControl fullWidth sx={{ mb: 2 }} error={!!errors.company}>
+          <InputLabel sx={{ color: "white" }} required>
+            Company
+          </InputLabel>
           <Select
             value={company}
             onChange={(e) => setCompany(e.target.value)}
@@ -237,6 +291,11 @@ const AddVehicleDialog = ({
             <MenuItem value="Kench trucking llc">Kench trucking llc</MenuItem>
             <MenuItem value="Other">Other</MenuItem>
           </Select>
+          {errors.company && (
+            <Typography color="error" sx={{ fontSize: 12, mt: 0.5 }}>
+              {errors.company}
+            </Typography>
+          )}
         </FormControl>
 
         <FormControlLabel
@@ -359,8 +418,10 @@ const AddVehicleDialog = ({
         >
           DVIR FORM
         </Typography>
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>DVIR Form *</InputLabel>
+        <FormControl fullWidth sx={{ mb: 2 }} error={!!errors.dvirForm}>
+          <InputLabel sx={{ color: "white" }} required>
+            DVIR Form
+          </InputLabel>
           <Select
             value={dvirForm}
             onChange={(e) => setDvirForm(e.target.value)}
@@ -370,6 +431,11 @@ const AddVehicleDialog = ({
             <MenuItem value="Default">Default</MenuItem>
             <MenuItem value="Custom">Custom</MenuItem>
           </Select>
+          {errors.dvirForm && (
+            <Typography color="error" sx={{ fontSize: 12, mt: 0.5 }}>
+              {errors.dvirForm}
+            </Typography>
+          )}
         </FormControl>
 
         {/* ================= REPORTS ================= */}
@@ -382,7 +448,6 @@ const AddVehicleDialog = ({
         <Typography sx={{ fontSize: 13, mb: 1, color: "#bbb" }}>
           Fleet Requested Distance
         </Typography>
-
         <FormControl sx={{ display: "flex", flexDirection: "column", mb: 2 }}>
           <FormControlLabel
             control={
@@ -405,9 +470,12 @@ const AddVehicleDialog = ({
             <TextField
               label="Custom value"
               type="number"
+              required={fleetDistance === "custom"}
               disabled={fleetDistance !== "custom"}
               value={customValue}
               onChange={(e) => setCustomValue(e.target.value)}
+              error={!!errors.customValue}
+              helperText={errors.customValue}
               sx={{ ml: 2, flex: 1 }}
               InputLabelProps={{ sx: { color: "white" } }}
               inputProps={{
@@ -436,6 +504,7 @@ const AddVehicleDialog = ({
               backgroundColor: "rgba(22,105,242,0.1)",
             },
           }}
+          onClick={() => setDocuments([...documents, "New document"])}
         >
           Add Document
         </Button>
