@@ -14,10 +14,11 @@ import {
   InputLabel,
   FormControl,
   Button,
-  IconButton
+  IconButton,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import AddVehicleDialog from "./AddVehicleDialog";
 
 import { useGetVehiclesQuery } from "@store/services/vehicles.service";
 
@@ -50,11 +51,17 @@ const vehicles = [
 const VehiclesContent = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Active");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-    const { data: AllVehicles = [] } = useGetVehiclesQuery({});
-  
-    console.log("AllVehicles", AllVehicles);
-  
+  const handleAddVehicle = (data: any) => {
+    console.log("New vehicle:", data);
+    // TODO: добавить API вызов createVehicle
+    setDialogOpen(false);
+  };
+
+  const { data: AllVehicles = [] } = useGetVehiclesQuery({});
+
+  console.log("AllVehicles", AllVehicles);
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
@@ -112,6 +119,7 @@ const VehiclesContent = () => {
         <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
           <Button
             variant="outlined"
+            onClick={() => setDialogOpen(true)}
             sx={{
               color: "#1669f2",
               borderColor: "#1669f2",
@@ -119,14 +127,17 @@ const VehiclesContent = () => {
               fontWeight: 600,
               fontSize: 13,
               minWidth: 110,
-              "&:hover": {
-                bgcolor: "#1669f230",
-                borderColor: "#1669f2",
-              },
+              "&:hover": { bgcolor: "#1669f230", borderColor: "#1669f2" },
             }}
           >
             + Add Vehicle
           </Button>
+
+          <AddVehicleDialog
+            open={dialogOpen}
+            onClose={() => setDialogOpen(false)}
+            onConfirm={handleAddVehicle}
+          />
           <Button
             variant="outlined"
             sx={{
