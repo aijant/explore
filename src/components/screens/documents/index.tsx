@@ -39,13 +39,12 @@ const DocumentsContent = () => {
   const [toDate, setToDate] = useState<Date | null>(null);
   const [vehicleFilter, setVehicleFilter] = useState("All");
   const [typeFilter, setTypeFilter] = useState("All");
-
   const [userUuid, setUserUuid] = useState<string | null>(null);
 
   const {
     data: documentsData = [],
-    refetch,
     isFetching,
+    refetch,
   } = useGetDocumentsQuery(
     userUuid ? userUuid : "21e7be79-b551-45c3-946b-1631622bc799"
   );
@@ -72,12 +71,20 @@ const DocumentsContent = () => {
       await createDocument(formData).unwrap();
       toast.success("Document successfully saved!");
 
-      setUserUuid(docData.userUuid); // Triggers fetch
+      setUserUuid(docData.userUuid);
       setDialogOpen(false);
     } catch (err: any) {
       toast.error("Error saving document!");
       console.error(err);
     }
+  };
+
+  const handleRefresh = () => {
+    setFromDate(null);
+    setToDate(null);
+    setVehicleFilter("All");
+    setTypeFilter("All");
+    refetch(); 
   };
 
   return (
@@ -136,25 +143,6 @@ const DocumentsContent = () => {
               },
             }}
           />
-
-          {/* Vehicle Filter */}
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel sx={{ color: "white", fontSize: "12px" }}>
-              Filter by Vehicle
-            </InputLabel>
-            <Select
-              value={vehicleFilter}
-              label="Filter by Vehicle"
-              onChange={(e) => setVehicleFilter(e.target.value)}
-              sx={{ bgcolor: "#1e2630", color: "white" }}
-              MenuProps={{
-                PaperProps: { sx: { bgcolor: "#1e2630", color: "white" } },
-              }}
-            >
-              <MenuItem value="All">All</MenuItem>
-              <MenuItem value="TRK-200">TRK-200</MenuItem>
-            </Select>
-          </FormControl>
 
           {/* Type Filter */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -224,11 +212,10 @@ const DocumentsContent = () => {
             >
               Export
             </Button>
-
+            
             <IconButton
               sx={{ color: "white", mb: "14px" }}
-              onClick={() => refetch()}
-              disabled={!userUuid}
+              onClick={handleRefresh}
             >
               <RefreshIcon />
             </IconButton>
@@ -267,7 +254,6 @@ const DocumentsContent = () => {
                   vehicleFilter === "All" ? true : doc.vehicle === vehicleFilter
                 )
                 ?.filter((doc: any) => {
-                  // ✅ фильтр по диапазону дат
                   const docDate = new Date(doc.date).setHours(0, 0, 0, 0);
                   const from = fromDate
                     ? new Date(fromDate).setHours(0, 0, 0, 0)
