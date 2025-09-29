@@ -20,40 +20,19 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DescriptionIcon from "@mui/icons-material/Description";
+import { DocumentType } from "@store/models/enums/general.enums";
 
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+
 import {
   useGetDocumentsQuery,
   useCreateDocumentMutation,
 } from "@store/services/documents.service";
-import toast from "react-hot-toast";
 
+import toast from "react-hot-toast";
 import AddDocumentDialog from "./AddDocumentDialog";
-// Sample documents
-const docs = [
-  {
-    id: 1,
-    createdAt: new Date("2025-09-17T22:42:00"),
-    uploadedBy: "Mira Scott",
-    type: "Scale Ticket",
-    vehicle: "008",
-    reference: "7777777",
-    note: "",
-    company: "Kench trucking llc",
-  },
-  {
-    id: 2,
-    createdAt: new Date("2025-09-17T04:08:00"),
-    uploadedBy: "Mira Scott",
-    type: "Other",
-    vehicle: "008",
-    reference: "gggg",
-    note: "jjj",
-    company: "Kench trucking llc",
-  },
-];
 
 const DocumentsContent = () => {
   const [fromDate, setFromDate] = useState<Date | null>(null);
@@ -61,9 +40,17 @@ const DocumentsContent = () => {
   const [vehicleFilter, setVehicleFilter] = useState("All");
   const [typeFilter, setTypeFilter] = useState("All");
 
-  const [createDocument] = useCreateDocumentMutation();
-  const { refetch } = useGetDocumentsQuery({}, { skip: true });
+  const [userUuid, setUserUuid] = useState<string | null>(null);
 
+  const {
+    data: documentsData = [],
+    refetch,
+    isFetching,
+  } = useGetDocumentsQuery(
+    userUuid ? userUuid : "21e7be79-b551-45c3-946b-1631622bc799"
+  );
+
+  const [createDocument] = useCreateDocumentMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleAddDocument = async (docData: any) => {
@@ -71,35 +58,27 @@ const DocumentsContent = () => {
       const formData = new FormData();
       formData.append("userUuid", docData.userUuid);
       formData.append("type", docData.type);
-      formData.append("date", docData.date);
+      const formattedDate = new Date(docData.date).toISOString().split("T")[0];
+      formData.append("date", formattedDate);
       formData.append("reference", docData.reference);
       formData.append("notes", docData.notes || "");
 
       if (docData.fileUrl instanceof File) {
-        formData.append("fileUrl", docData.file);
+        formData.append("file", docData.fileUrl);
       } else {
         throw new Error("Invalid file format: must be File object");
       }
 
-      await createDocument(formData).unwrap(); // <-- assumes RTK Query
-      toast.success("Документ успешно сохранён");
-      refetch();
+      await createDocument(formData).unwrap();
+      toast.success("Document successfully saved!");
+
+      setUserUuid(docData.userUuid); // Triggers fetch
       setDialogOpen(false);
     } catch (err: any) {
-      toast.error("Ошибка при сохранении документа");
+      toast.error("Error saving document!");
       console.error(err);
     }
   };
-
-  const filteredDocs = docs.filter((d) => {
-    const matchesVehicle =
-      vehicleFilter === "All" || d.vehicle === vehicleFilter;
-    const matchesType = typeFilter === "All" || d.type === typeFilter;
-    const matchesDate =
-      (!fromDate || d.createdAt >= fromDate) &&
-      (!toDate || d.createdAt <= toDate);
-    return matchesVehicle && matchesType && matchesDate;
-  });
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -116,50 +95,47 @@ const DocumentsContent = () => {
             alignItems: "center",
           }}
         >
-          <>
-            <span>Filter by Date: </span>
-            {/* From Date Picker */}
-            <DesktopDatePicker
-              label="From"
-              value={fromDate}
-              onChange={(newValue) => setFromDate(newValue)}
-              enableAccessibleFieldDOMStructure={false}
-              slots={{ textField: TextField }}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  sx: {
-                    bgcolor: "#1e2630",
-                    borderRadius: 1,
-                    input: { color: "white" },
-                    label: { color: "white" },
-                    svg: { color: "white" },
-                  },
-                },
-              }}
-            />
+          <span>Filter by Date Range:</span>
 
-            {/* To Date Picker */}
-            <DesktopDatePicker
-              label="To"
-              value={toDate}
-              onChange={(newValue) => setToDate(newValue)}
-              enableAccessibleFieldDOMStructure={false}
-              slots={{ textField: TextField }}
-              slotProps={{
-                textField: {
-                  size: "small",
-                  sx: {
-                    bgcolor: "#1e2630",
-                    borderRadius: 1,
-                    input: { color: "white" },
-                    label: { color: "white" },
-                    svg: { color: "white" },
-                  },
+          <DesktopDatePicker
+            label="From"
+            value={fromDate}
+            onChange={(newValue) => setFromDate(newValue)}
+            enableAccessibleFieldDOMStructure={false}
+            slots={{ textField: TextField }}
+            slotProps={{
+              textField: {
+                size: "small",
+                sx: {
+                  bgcolor: "#1e2630",
+                  borderRadius: 1,
+                  input: { color: "white" },
+                  label: { color: "white" },
+                  svg: { color: "white" },
                 },
-              }}
-            />
-          </>
+              },
+            }}
+          />
+
+          <DesktopDatePicker
+            label="To"
+            value={toDate}
+            onChange={(newValue) => setToDate(newValue)}
+            enableAccessibleFieldDOMStructure={false}
+            slots={{ textField: TextField }}
+            slotProps={{
+              textField: {
+                size: "small",
+                sx: {
+                  bgcolor: "#1e2630",
+                  borderRadius: 1,
+                  input: { color: "white" },
+                  label: { color: "white" },
+                  svg: { color: "white" },
+                },
+              },
+            }}
+          />
 
           {/* Vehicle Filter */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -176,7 +152,7 @@ const DocumentsContent = () => {
               }}
             >
               <MenuItem value="All">All</MenuItem>
-              <MenuItem value="008">008</MenuItem>
+              <MenuItem value="TRK-200">TRK-200</MenuItem>
             </Select>
           </FormControl>
 
@@ -187,7 +163,6 @@ const DocumentsContent = () => {
             </InputLabel>
             <Select
               value={typeFilter}
-              label="Filter by Type"
               onChange={(e) => setTypeFilter(e.target.value)}
               sx={{ bgcolor: "#1e2630", color: "white" }}
               MenuProps={{
@@ -195,40 +170,42 @@ const DocumentsContent = () => {
               }}
             >
               <MenuItem value="All">All</MenuItem>
-              <MenuItem value="Scale Ticket">Scale Ticket</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
+              {Object.entries(DocumentType).map(([key, value]) => (
+                <MenuItem key={key} value={key}>
+                  {value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           {/* Action Buttons */}
           <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
-            <>
-              <Button
-                variant="outlined"
-                onClick={() => setDialogOpen(true)}
-                sx={{
-                  color: "#1669f2",
+            <Button
+              variant="outlined"
+              onClick={() => setDialogOpen(true)}
+              sx={{
+                color: "#1669f2",
+                borderColor: "#1669f2",
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: 13,
+                minWidth: 110,
+                mb: 2,
+                "&:hover": {
+                  bgcolor: "#1669f230",
                   borderColor: "#1669f2",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: 13,
-                  minWidth: 110,
-                  mb: 2,
-                  "&:hover": {
-                    bgcolor: "#1669f230",
-                    borderColor: "#1669f2",
-                  },
-                }}
-              >
-                + Add Document
-              </Button>
+                },
+              }}
+            >
+              + Add Document
+            </Button>
 
-              <AddDocumentDialog
-                open={dialogOpen}
-                onClose={() => setDialogOpen(false)}
-                onConfirm={handleAddDocument}
-              />
-            </>
+            <AddDocumentDialog
+              open={dialogOpen}
+              onClose={() => setDialogOpen(false)}
+              onConfirm={handleAddDocument}
+            />
+
             <Button
               variant="outlined"
               sx={{
@@ -247,7 +224,12 @@ const DocumentsContent = () => {
             >
               Export
             </Button>
-            <IconButton sx={{ color: "white", mb: "14px" }}>
+
+            <IconButton
+              sx={{ color: "white", mb: "14px" }}
+              onClick={() => refetch()}
+              disabled={!userUuid}
+            >
               <RefreshIcon />
             </IconButton>
           </Box>
@@ -260,13 +242,11 @@ const DocumentsContent = () => {
               <TableRow>
                 {[
                   "CREATED AT ↑",
-                  "UPLOADED BY",
                   "TYPE",
                   "VEHICLE",
                   "REFERENCE",
                   "NOTE",
                   "DOCUMENTS",
-                  "COMPANY",
                   "",
                 ].map((head) => (
                   <TableCell
@@ -279,40 +259,65 @@ const DocumentsContent = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredDocs.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell sx={{ color: "white" }}>
-                    {doc.createdAt.toLocaleString()}
-                  </TableCell>
-                  <TableCell sx={{ color: "white" }}>
-                    {doc.uploadedBy}
-                  </TableCell>
-                  <TableCell sx={{ color: "white" }}>{doc.type}</TableCell>
-                  <TableCell sx={{ color: "white" }}>{doc.vehicle}</TableCell>
-                  <TableCell sx={{ color: "white" }}>{doc.reference}</TableCell>
-                  <TableCell sx={{ color: "white" }}>
-                    {doc.note || "-"}
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip title="View Document">
-                      <DescriptionIcon
-                        sx={{ color: "white", cursor: "pointer" }}
-                      />
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell sx={{ color: "white" }}>{doc.company}</TableCell>
-                  <TableCell>
-                    <IconButton sx={{ color: "white" }}>
-                      <MoreVertIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {documentsData?.content
+                ?.filter((doc: any) =>
+                  typeFilter === "All" ? true : doc.type === typeFilter
+                )
+                ?.filter((doc: any) =>
+                  vehicleFilter === "All" ? true : doc.vehicle === vehicleFilter
+                )
+                ?.filter((doc: any) => {
+                  // ✅ фильтр по диапазону дат
+                  const docDate = new Date(doc.date).setHours(0, 0, 0, 0);
+                  const from = fromDate
+                    ? new Date(fromDate).setHours(0, 0, 0, 0)
+                    : null;
+                  const to = toDate
+                    ? new Date(toDate).setHours(23, 59, 59, 999)
+                    : null;
 
-              {filteredDocs.length === 0 && (
+                  if (from && to) return docDate >= from && docDate <= to;
+                  if (from) return docDate >= from;
+                  if (to) return docDate <= to;
+                  return true;
+                })
+                .map((doc: any) => (
+                  <TableRow key={doc.id}>
+                    <TableCell sx={{ color: "white" }}>
+                      {new Date(doc.date).toLocaleString()}
+                    </TableCell>
+                    <TableCell sx={{ color: "white" }}>
+                      {DocumentType[doc.type as keyof typeof DocumentType] ||
+                        doc.type}
+                    </TableCell>
+                    <TableCell sx={{ color: "white" }}>{doc.vehicle}</TableCell>
+                    <TableCell sx={{ color: "white" }}>
+                      {doc.reference}
+                    </TableCell>
+                    <TableCell sx={{ color: "white" }}>
+                      {doc.notes || "-"}
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title="View Document">
+                        <DescriptionIcon
+                          sx={{ color: "white", cursor: "pointer" }}
+                        />
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <IconButton sx={{ color: "white" }}>
+                        <MoreVertIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+              {documentsData?.content?.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={9} align="center" sx={{ color: "white" }}>
-                    No documents found.
+                    {isFetching
+                      ? "Loading documents..."
+                      : "No documents found."}
                   </TableCell>
                 </TableRow>
               )}

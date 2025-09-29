@@ -9,19 +9,17 @@ export const documentsApi = createApi({
   tagTypes: ["documents"],
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    getDocuments: builder.query<IDocuments, any>({
-      query: (params) => ({
-        url: "/api/documents",
-        method: "POST",
-        body: params,
+    getDocuments: builder.query<any, any>({
+      query: (id) => ({
+        url: `api/documents?userUuid=${id}&page=0&size=20`,
+        method: "GET",
       }),
       providesTags: ["documents"],
     }),
 
-    // создать документ
     createDocument: builder.mutation<IDocuments, any>({
       query: (body) => ({
-        url: "/api/documents", 
+        url: "/api/documents",
         method: "POST",
         body,
       }),

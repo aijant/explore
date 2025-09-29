@@ -72,7 +72,7 @@ const AddDocumentDialog = ({
     const document = {
       userUuid: vehicleId,
       type,
-      date: dateTime.split("T")[0],
+      date: dateTime,
       reference,
       notes,
       fileUrl: file,
