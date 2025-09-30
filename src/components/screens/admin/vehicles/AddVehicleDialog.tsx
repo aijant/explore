@@ -7,42 +7,26 @@ import {
   DialogActions,
   TextField,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Typography,
   Switch,
   FormControlLabel,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
-import { useGetVehiclesQuery } from "@store/services/vehicles.service";
 import {
   FuelType,
   UsState,
   DocumentName,
 } from "@store/models/enums/general.enums";
 
-interface Vehicle {
-  vehicleId: string;
-  vin: string;
-  year: string;
-  make: string;
-  model: string;
-  color: string;
-  fuelType: string;
-  licenseIssuingState: string;
-  licensePlateNumber: string;
-  company: string;
+interface VehicleDocument {
+  documentName: DocumentName | "";
+  customName: string;
+  expirationDate: string;
+  file: File | null;
 }
-
- // DOCUMENTS
-  interface VehicleDocument {
-    documentName: DocumentName | "";
-    customName: string;
-    expirationDate: string;
-    file: File | null;
-  }
-
 
 const AddVehicleDialog = ({
   open,
@@ -53,33 +37,41 @@ const AddVehicleDialog = ({
   onClose: () => void;
   onConfirm: (data: any) => void;
 }) => {
+  // ====== VEHICLE FIELDS ======
+  const [vehicleId, setVehicleId] = useState("");
+  const [vin, setVin] = useState("");
+  const [year, setYear] = useState("");
+  const [make, setMake] = useState("");
+  const [model, setModel] = useState("");
+  const [color, setColor] = useState("");
+  const [fuelType, setFuelType] = useState("");
+  const [licenseState, setLicenseState] = useState("");
+  const [licensePlate, setLicensePlate] = useState("");
+  const [company, setCompany] = useState("");
+  const [companyOwned, setCompanyOwned] = useState(true);
+
+  // ====== DEVICE FIELDS ======
+  const [eldSn, setEldSn] = useState("");
+  const [gpsDevices, setGpsDevices] = useState("");
+  const [tabletSn, setTabletSn] = useState("");
+  const [cameraSn, setCameraSn] = useState("");
+  const [dvirForm, setDvirForm] = useState("");
+
+  // ====== FLEET DISTANCE ======
+  const [fleetDistance, setFleetDistance] = useState<"default" | "custom">(
+    "default"
+  );
+  const [customValue, setCustomValue] = useState("");
+
+  // ====== DOCUMENTS ======
+  const [documents, setDocuments] = useState<VehicleDocument[]>([]);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [documentName, setDocumentName] = useState<DocumentName | "">("");
   const [customName, setCustomName] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
-  const [file, setFile] = useState<any>(null);
+  const [file, setFile] = useState<File | null>(null);
 
-  const handleDocumentDialogOpen = () => {
-    setDocumentDialogOpen(true);
-  };
-
-  const handleDocumentDialogClose = () => {
-    setDocumentDialogOpen(false);
-    resetDocumentForm();
-  };
-
-  const resetDocumentForm = () => {
-    setDocumentName("");
-    setCustomName("");
-    setExpirationDate("");
-    setFile(null);
-  };
-
-  const handleDialogClose = () => {
-    setDocuments([]);
-    resetForm();
-    onClose();
-  };
+  const [errors, setErrors] = useState<any>({});
 
   const resetForm = () => {
     setVehicleId("");
@@ -107,57 +99,43 @@ const AddVehicleDialog = ({
     setErrors({});
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setFile(event.target.files[0]);
-    }
+  const handleDialogClose = () => {
+    resetForm();
+    onClose();
   };
 
-  const [vehicleId, setVehicleId] = useState("");
-  const [vin, setVin] = useState("");
-  const [year, setYear] = useState("");
-  const [make, setMake] = useState("");
-  const [model, setModel] = useState("");
-  const [color, setColor] = useState("");
-  const [fuelType, setFuelType] = useState("");
-  const [licenseState, setLicenseState] = useState("");
-  const [licensePlate, setLicensePlate] = useState("");
-  const [company, setCompany] = useState("");
-  const [companyOwned, setCompanyOwned] = useState(true);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) setFile(event.target.files[0]);
+  };
 
-  const [eldSn, setEldSn] = useState("");
-  const [gpsDevices, setGpsDevices] = useState("");
-  const [tabletSn, setTabletSn] = useState("");
-  const [cameraSn, setCameraSn] = useState("");
-  const [dvirForm, setDvirForm] = useState("");
+  const handleDocumentDialogOpen = () => setDocumentDialogOpen(true);
+  const handleDocumentDialogClose = () => {
+    resetDocumentForm();
+    setDocumentDialogOpen(false);
+  };
 
-  const [fleetDistance, setFleetDistance] = useState<"default" | "custom">(
-    "default"
-  );
-  const [customValue, setCustomValue] = useState("");
+  const resetDocumentForm = () => {
+    setDocumentName("");
+    setCustomName("");
+    setExpirationDate("");
+    setFile(null);
+  };
 
-  const [errors, setErrors] = useState<any>({});
+  const handleDocumentSubmit = () => {
+    const newDoc: VehicleDocument = {
+      documentName,
+      customName,
+      expirationDate,
+      file,
+    };
+    setDocuments((prev) => [...prev, newDoc]);
+    resetDocumentForm();
+    setDocumentDialogOpen(false);
+  };
 
-  const { data: AllVehicles = [] } = useGetVehiclesQuery({});
-
-  console.log("AllVehicles0000", AllVehicles);
-
-  const vehicleOptions: Vehicle[] = AllVehicles.content || [];
-
-  const vehicleIdOptions = vehicleOptions.map(
-    (vehicle: any) => vehicle.vehicleId
-  );
-  const vinOptions = vehicleOptions.map((vehicle: any) => vehicle.vin);
-  const yearOptions = vehicleOptions.map((vehicle: any) => vehicle.year);
-  const makeOptions = vehicleOptions.map((vehicle: any) => vehicle.make);
-  const modelOptions = vehicleOptions.map((vehicle: any) => vehicle.model);
-  const colorOptions = vehicleOptions.map((vehicle: any) => vehicle.color);
-  const fuelTypeOptions = Object.values(FuelType);
-  const licenseStateOptions = Object.values(UsState);
-  const licensePlateOptions = vehicleOptions.map(
-    (vehicle: any) => vehicle.licensePlateNumber
-  );
-  const companyOptions = vehicleOptions.map((vehicle: any) => vehicle.company);
+  const handleRemoveDocument = (index: number) => {
+    setDocuments((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const validate = () => {
     const newErrors: any = {};
@@ -167,26 +145,6 @@ const AddVehicleDialog = ({
     if (!company) newErrors.company = "Company is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
- 
-  const [documents, setDocuments] = useState<VehicleDocument[]>([]);
-
-  const handleDocumentSubmit = () => {
-    const newDoc: VehicleDocument = {
-      documentName,
-      customName,
-      expirationDate,
-      file,
-    };
-      setDocuments((prev) => [...prev, newDoc]);
-      resetDocumentForm()
-    console.log("Document Data:", newDoc);
-    setDocumentDialogOpen(false);
-  };
-
-  const handleRemoveDocument = (index: number) => {
-    setDocuments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = () => {
@@ -210,23 +168,10 @@ const AddVehicleDialog = ({
       dvirForm,
       fleetDistance,
       customValue,
-      documents, // full list of docs
+      documents,
     };
     onConfirm(data);
     resetForm();
-  };
-
-  const selectMenuProps = {
-    PaperProps: {
-      sx: {
-        bgcolor: "#1e2630",
-        color: "white",
-        "& .MuiMenuItem-root": {
-          color: "white",
-          "&:hover": { backgroundColor: "#2a3442" },
-        },
-      },
-    },
   };
 
   return (
@@ -238,7 +183,6 @@ const AddVehicleDialog = ({
       </DialogTitle>
 
       <DialogContent dividers sx={{ bgcolor: "#121a26", color: "white" }}>
-        {/* ================= GENERAL ================= */}
         <Typography
           variant="subtitle2"
           sx={{ mb: 2, color: "#888", fontSize: 12, fontWeight: "bold" }}
@@ -246,177 +190,114 @@ const AddVehicleDialog = ({
           GENERAL
         </Typography>
 
-        {/* Vehicle ID */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Vehicle ID</InputLabel>
-          <Select
-            value={vehicleId}
-            onChange={(e) => setVehicleId(e.target.value)}
-            MenuProps={selectMenuProps}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-          >
-            {vehicleIdOptions?.map((id) => (
-              <MenuItem key={id} value={id}>
-                {id}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        {/* ==== TEXT FIELDS ==== */}
+        <TextField
+          label="Vehicle ID"
+          required
+          value={vehicleId}
+          onChange={(e) => setVehicleId(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ sx: { color: "white" } }}
+          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+        />
+        <TextField
+          label="VIN"
+          required
+          value={vin}
+          onChange={(e) => setVin(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ sx: { color: "white" } }}
+          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+        />
+        <TextField
+          label="Year"
+          type="number"
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ sx: { color: "white" } }}
+          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+        />
+        <TextField
+          label="Make"
+          value={make}
+          onChange={(e) => setMake(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ sx: { color: "white" } }}
+          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+        />
+        <TextField
+          label="Model"
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ sx: { color: "white" } }}
+          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+        />
+        <TextField
+          label="Color"
+          value={color}
+          onChange={(e) => setColor(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ sx: { color: "white" } }}
+          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+        />
+        <TextField
+          label="License Plate"
+          value={licensePlate}
+          onChange={(e) => setLicensePlate(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ sx: { color: "white" } }}
+          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+        />
+        <TextField
+          label="Company"
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          InputLabelProps={{ sx: { color: "white" } }}
+          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+        />
 
-        {/* VIN */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>VIN</InputLabel>
-          <Select
-            value={vin}
-            onChange={(e) => setVin(e.target.value)}
-            MenuProps={selectMenuProps}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-          >
-            {vinOptions.map((vinOption) => (
-              <MenuItem key={vinOption} value={vinOption}>
-                {vinOption}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Year */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Year</InputLabel>
-          <Select
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            MenuProps={selectMenuProps}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-          >
-            {yearOptions.map((yearOption) => (
-              <MenuItem key={yearOption} value={yearOption}>
-                {yearOption}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Make */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Make</InputLabel>
-          <Select
-            value={make}
-            onChange={(e) => setMake(e.target.value)}
-            MenuProps={selectMenuProps}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-          >
-            {makeOptions.map((makeOption) => (
-              <MenuItem key={makeOption} value={makeOption}>
-                {makeOption}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Model */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Model</InputLabel>
-          <Select
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            MenuProps={selectMenuProps}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-          >
-            {modelOptions.map((modelOption) => (
-              <MenuItem key={modelOption} value={modelOption}>
-                {modelOption}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Color */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Color</InputLabel>
-          <Select
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            MenuProps={selectMenuProps}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-          >
-            {colorOptions.map((colorOption) => (
-              <MenuItem key={colorOption} value={colorOption}>
-                {colorOption}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Fuel Type */}
+        {/* ==== DROPDOWNS ==== */}
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel sx={{ color: "white" }}>Fuel Type</InputLabel>
           <Select
             value={fuelType}
             onChange={(e) => setFuelType(e.target.value)}
-            MenuProps={selectMenuProps}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            {fuelTypeOptions.map((fuelOption) => (
-              <MenuItem key={fuelOption} value={fuelOption}>
-                {fuelOption}
+            {Object.values(FuelType).map((fuel) => (
+              <MenuItem key={fuel} value={fuel}>
+                {fuel}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        {/* License State */}
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel sx={{ color: "white" }}>License State</InputLabel>
           <Select
             value={licenseState}
             onChange={(e) => setLicenseState(e.target.value)}
-            MenuProps={selectMenuProps}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            {licenseStateOptions.map((stateOption) => (
-              <MenuItem key={stateOption} value={stateOption}>
-                {stateOption}
+            {Object.values(UsState).map((state) => (
+              <MenuItem key={state} value={state}>
+                {state}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        {/* License Plate */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>License Plate</InputLabel>
-          <Select
-            value={licensePlate}
-            onChange={(e) => setLicensePlate(e.target.value)}
-            MenuProps={selectMenuProps}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-          >
-            {licensePlateOptions.map((plateOption) => (
-              <MenuItem key={plateOption} value={plateOption}>
-                {plateOption}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Company */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>Company</InputLabel>
-          <Select
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            MenuProps={selectMenuProps}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-          >
-            {companyOptions.map((companyOption) => (
-              <MenuItem key={companyOption} value={companyOption}>
-                {companyOption}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Company Owned */}
         <FormControlLabel
           control={
             <Switch
@@ -446,7 +327,7 @@ const AddVehicleDialog = ({
           <Select
             value={eldSn}
             onChange={(e) => setEldSn(e.target.value)}
-            MenuProps={selectMenuProps}
+            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="No ELD device">No ELD device</MenuItem>
@@ -472,7 +353,7 @@ const AddVehicleDialog = ({
           <Select
             value={gpsDevices}
             onChange={(e) => setGpsDevices(e.target.value)}
-            MenuProps={selectMenuProps}
+            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="No GPS device">No GPS device</MenuItem>
@@ -497,7 +378,7 @@ const AddVehicleDialog = ({
           <Select
             value={tabletSn}
             onChange={(e) => setTabletSn(e.target.value)}
-            MenuProps={selectMenuProps}
+            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="TBL001">No Tablet device</MenuItem>
@@ -522,7 +403,7 @@ const AddVehicleDialog = ({
           <Select
             value={cameraSn}
             onChange={(e) => setCameraSn(e.target.value)}
-            MenuProps={selectMenuProps}
+            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="No Camera device">No Camera device</MenuItem>
@@ -547,7 +428,7 @@ const AddVehicleDialog = ({
           <Select
             value={dvirForm}
             onChange={(e) => setDvirForm(e.target.value)}
-            MenuProps={selectMenuProps}
+            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="Default">Default</MenuItem>

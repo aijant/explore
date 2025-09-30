@@ -19,25 +19,25 @@ export enum DocumentType {
 }
 
 export enum FuelType {
-  DIESEL = "Diesel",
-  GASOLINE = "Gasoline",
-  PROPANE = "Propane",
-  LIQUID_NATURAL_GAS = "Liquid Natural Gas",
-  COMPRESSED_NATURAL_GAS = "Compressed Natural Gas",
-  ETHANOL = "Ethanol",
-  METHANOL = "Methanol",
+  Diesel = "Diesel",
+  Gasoline = "Gasoline",
+  Propane = "Propane",
+  Liquid_Natural_Gas = "Liquid_Natural_Gas",
+  Compressed_Natural_Gas = "Compressed_Natural_Gas",
+  Ethanol = "Ethanol",
+  Methanol = "Methanol",
   E_85 = "E_85",
   M_85 = "M_85",
   A55 = "A55",
-  BIODIESEL = "Biodiesel",
-  OTHER = "Other",
+  Biodiesel = "Biodiesel",
+  Other = "Other",
 }
 
 export enum DocumentName {
-  PHYSICAL_DAMAGE = "Physical Damage",
+  PHYSICAL_DAMAGE = "PhysicalDamage",
   REGISTRATION = "Registration",
-  ANNUAL_DOT = "Annual DOT",
-  CUSTOM_NAME = "Custom Name",
+  ANNUAL_DOT = "AnnualDOT",
+  CUSTOM_NAME = "CustomName",
 }
 
 export enum UsState {

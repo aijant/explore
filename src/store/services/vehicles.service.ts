@@ -1,5 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "../interceptor";
+import { VehicleWithDocRequest } from "../models/interfaces/vehicles.interfaces";
+
 
 export const vehiclesApi = createApi({
   reducerPath: "vehiclesApi",
@@ -18,7 +20,6 @@ export const vehiclesApi = createApi({
           query.append("page", params.page.toString());
         if (params.size !== undefined)
           query.append("size", params.size.toString());
-      
 
         return {
           url: `/api/vehicles?${query.toString()}`,
@@ -26,7 +27,15 @@ export const vehiclesApi = createApi({
         };
       },
     }),
+    createVehicles: builder.mutation<VehicleWithDocRequest, any>({
+      query: (body) => ({
+        url: "/api/vehicles-with-doc",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["vehicles"],
+    }),
   }),
 });
 
-export const { useGetVehiclesQuery } = vehiclesApi;
+export const { useGetVehiclesQuery, useCreateVehiclesMutation } = vehiclesApi;

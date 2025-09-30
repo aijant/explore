@@ -19,61 +19,73 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AddVehicleDialog from "./AddVehicleDialog";
+import toast from "react-hot-toast";
 
-// import { useGetVehiclesQuery } from "@store/services/vehicles.service";
-
-// Sample vehicle data
-const vehicles = [
-  {
-    id: "007",
-    licensePlate: "IL-SPG515369",
-    eldSn: "500211",
-    gpsSn: "",
-    tabletSn: "",
-    cameraSn: "500211",
-    groups: "Unassigned",
-    documents: "",
-    status: "Active",
-  },
-  {
-    id: "008",
-    licensePlate: "IL-P1247706",
-    eldSn: "200195",
-    gpsSn: "",
-    tabletSn: "",
-    cameraSn: "200195",
-    groups: "Unassigned",
-    documents: "",
-    status: "Active",
-  },
-];
+import {
+  useCreateVehiclesMutation,
+  useGetVehiclesQuery,
+} from "@store/services/vehicles.service";
 
 const VehiclesContent = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Active");
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const handleAddVehicle = (data: any) => {
-    console.log("New vehicle:", data);
-    // TODO: добавить API вызов createVehicle
-    setDialogOpen(false);
+  // Get all vehicles from API
+  const { data: data = [], refetch } = useGetVehiclesQuery({});
+  const AllVehicles = Array.isArray(data?.content) ? data.content : [];
+
+  console.log("AllVehicles", AllVehicles);
+  const [createVehicles] = useCreateVehiclesMutation();
+
+  const handleAddVehicle = async (data: any) => {
+    try {
+      const formData = new FormData();
+
+      const vehiclePayload = {
+        vehicleId: data.vehicleId,
+        vin: data.vin,
+        year: Number(data.year),
+        make: data.make,
+        model: data.model,
+        color: data.color,
+        fuelType: data.fuelType,
+        fleetRequestedDistance:
+          data.fleetDistance === "custom" ? Number(data.customValue) : 500,
+        licenseIssuingState: data.licenseState,
+        licensePlateNumber: data.licensePlate,
+        company: data.company,
+        companyOwned: Boolean(data.companyOwned),
+        status: data.status ?? true,
+      };
+
+      formData.append("vehicle", JSON.stringify(vehiclePayload));
+
+      if (Array.isArray(data.documents)) {
+        data.documents.forEach((doc: any) => {
+          formData.append("documentName", doc.documentName);
+          formData.append("customName", doc.customName || "");
+          formData.append(
+            "expirationDate",
+            new Date(doc.expirationDate).toISOString()
+          );
+          if (doc.file) {
+            formData.append("file", doc.file, doc.file.name);
+          }
+        });
+      }
+
+      await createVehicles(formData).unwrap();
+
+      toast.success("Vehicle successfully saved!");
+      setDialogOpen(false);
+
+      // REFRESH VEHICLES DATA
+      refetch();
+    } catch (err: any) {
+      toast.error("Error saving vehicle!");
+    }
   };
-
-  // const { data: AllVehicles = [] } = useGetVehiclesQuery({});
-
-  // console.log("AllVehicles", AllVehicles);
-
-  const filteredVehicles = vehicles.filter((vehicle) => {
-    const matchesSearch =
-      vehicle.id.toLowerCase().includes(search.toLowerCase()) ||
-      vehicle.eldSn.toLowerCase().includes(search.toLowerCase()) ||
-      vehicle.gpsSn.toLowerCase().includes(search.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "All" || vehicle.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
 
   return (
     <Box sx={{ p: 3, bgcolor: "#121a26", color: "white" }}>
@@ -115,7 +127,6 @@ const VehiclesContent = () => {
           </Select>
         </FormControl>
 
-        {/* Buttons */}
         <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
           <Button
             variant="outlined"
@@ -138,6 +149,7 @@ const VehiclesContent = () => {
             onClose={() => setDialogOpen(false)}
             onConfirm={handleAddVehicle}
           />
+
           <Button
             variant="outlined"
             sx={{
@@ -147,15 +159,13 @@ const VehiclesContent = () => {
               fontWeight: 600,
               fontSize: 13,
               minWidth: 110,
-              "&:hover": {
-                bgcolor: "#1669f230",
-                borderColor: "#1669f2",
-              },
+              "&:hover": { bgcolor: "#1669f230", borderColor: "#1669f2" },
             }}
           >
             Export
           </Button>
-          <IconButton sx={{ color: "white" }}>
+
+          <IconButton sx={{ color: "white" }} onClick={() => refetch()}>
             <RefreshIcon />
           </IconButton>
         </Box>
@@ -199,14 +209,16 @@ const VehiclesContent = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredVehicles.map((vehicle) => (
+            {AllVehicles.map((vehicle: any) => (
               <TableRow
-                key={vehicle.id}
+                key={vehicle.vehicleId}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell sx={{ color: "white" }}>{vehicle.id}</TableCell>
                 <TableCell sx={{ color: "white" }}>
-                  {vehicle.licensePlate}
+                  {vehicle.vehicleId}
+                </TableCell>
+                <TableCell sx={{ color: "white" }}>
+                  {vehicle.licensePlateNumber}
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>{vehicle.eldSn}</TableCell>
                 <TableCell sx={{ color: "white" }}>{vehicle.gpsSn}</TableCell>
@@ -218,9 +230,11 @@ const VehiclesContent = () => {
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>{vehicle.groups}</TableCell>
                 <TableCell sx={{ color: "white" }}>
-                  {vehicle.documents}
+                  {vehicle.documents?.length || 0}
                 </TableCell>
-                <TableCell sx={{ color: "white" }}>{vehicle.status}</TableCell>
+                <TableCell sx={{ color: "white" }}>
+                  {vehicle.status ? "Active" : "Inactive"}
+                </TableCell>
                 <TableCell>
                   <IconButton sx={{ color: "white" }}>
                     <MoreVertIcon />
@@ -229,7 +243,7 @@ const VehiclesContent = () => {
               </TableRow>
             ))}
 
-            {filteredVehicles.length === 0 && (
+            {AllVehicles.length === 0 && (
               <TableRow>
                 <TableCell colSpan={10} align="center" sx={{ color: "white" }}>
                   No vehicles found.
