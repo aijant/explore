@@ -13,10 +13,36 @@ import {
   Typography,
   Switch,
   FormControlLabel,
-  OutlinedInput,
-  IconButton,
 } from "@mui/material";
-import { Add, Remove } from "@mui/icons-material";
+import { Add } from "@mui/icons-material";
+import { useGetVehiclesQuery } from "@store/services/vehicles.service";
+import {
+  FuelType,
+  UsState,
+  DocumentName,
+} from "@store/models/enums/general.enums";
+
+interface Vehicle {
+  vehicleId: string;
+  vin: string;
+  year: string;
+  make: string;
+  model: string;
+  color: string;
+  fuelType: string;
+  licenseIssuingState: string;
+  licensePlateNumber: string;
+  company: string;
+}
+
+ // DOCUMENTS
+  interface VehicleDocument {
+    documentName: DocumentName | "";
+    customName: string;
+    expirationDate: string;
+    file: File | null;
+  }
+
 
 const AddVehicleDialog = ({
   open,
@@ -27,7 +53,66 @@ const AddVehicleDialog = ({
   onClose: () => void;
   onConfirm: (data: any) => void;
 }) => {
-  // GENERAL
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+  const [documentName, setDocumentName] = useState<DocumentName | "">("");
+  const [customName, setCustomName] = useState("");
+  const [expirationDate, setExpirationDate] = useState("");
+  const [file, setFile] = useState<any>(null);
+
+  const handleDocumentDialogOpen = () => {
+    setDocumentDialogOpen(true);
+  };
+
+  const handleDocumentDialogClose = () => {
+    setDocumentDialogOpen(false);
+    resetDocumentForm();
+  };
+
+  const resetDocumentForm = () => {
+    setDocumentName("");
+    setCustomName("");
+    setExpirationDate("");
+    setFile(null);
+  };
+
+  const handleDialogClose = () => {
+    setDocuments([]);
+    resetForm();
+    onClose();
+  };
+
+  const resetForm = () => {
+    setVehicleId("");
+    setVin("");
+    setYear("");
+    setMake("");
+    setModel("");
+    setColor("");
+    setFuelType("");
+    setLicenseState("");
+    setLicensePlate("");
+    setCompany("");
+    setCompanyOwned(true);
+
+    setEldSn("");
+    setGpsDevices("");
+    setTabletSn("");
+    setCameraSn("");
+    setDvirForm("");
+
+    setFleetDistance("default");
+    setCustomValue("");
+
+    setDocuments([]);
+    setErrors({});
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setFile(event.target.files[0]);
+    }
+  };
+
   const [vehicleId, setVehicleId] = useState("");
   const [vin, setVin] = useState("");
   const [year, setYear] = useState("");
@@ -40,24 +125,39 @@ const AddVehicleDialog = ({
   const [company, setCompany] = useState("");
   const [companyOwned, setCompanyOwned] = useState(true);
 
-  // DEVICES
   const [eldSn, setEldSn] = useState("");
-  const [gpsDevices, setGpsDevices] = useState<string[]>([""]);
+  const [gpsDevices, setGpsDevices] = useState("");
   const [tabletSn, setTabletSn] = useState("");
   const [cameraSn, setCameraSn] = useState("");
   const [dvirForm, setDvirForm] = useState("");
 
-  // REPORTS
   const [fleetDistance, setFleetDistance] = useState<"default" | "custom">(
     "default"
   );
   const [customValue, setCustomValue] = useState("");
 
-  // DOCUMENTS
-  const [documents, setDocuments] = useState<string[]>([]);
-
-  // ERRORS
   const [errors, setErrors] = useState<any>({});
+
+  const { data: AllVehicles = [] } = useGetVehiclesQuery({});
+
+  console.log("AllVehicles0000", AllVehicles);
+
+  const vehicleOptions: Vehicle[] = AllVehicles.content || [];
+
+  const vehicleIdOptions = vehicleOptions.map(
+    (vehicle: any) => vehicle.vehicleId
+  );
+  const vinOptions = vehicleOptions.map((vehicle: any) => vehicle.vin);
+  const yearOptions = vehicleOptions.map((vehicle: any) => vehicle.year);
+  const makeOptions = vehicleOptions.map((vehicle: any) => vehicle.make);
+  const modelOptions = vehicleOptions.map((vehicle: any) => vehicle.model);
+  const colorOptions = vehicleOptions.map((vehicle: any) => vehicle.color);
+  const fuelTypeOptions = Object.values(FuelType);
+  const licenseStateOptions = Object.values(UsState);
+  const licensePlateOptions = vehicleOptions.map(
+    (vehicle: any) => vehicle.licensePlateNumber
+  );
+  const companyOptions = vehicleOptions.map((vehicle: any) => vehicle.company);
 
   const validate = () => {
     const newErrors: any = {};
@@ -65,11 +165,28 @@ const AddVehicleDialog = ({
     if (!vin) newErrors.vin = "VIN is required";
     if (!fuelType) newErrors.fuelType = "Fuel type is required";
     if (!company) newErrors.company = "Company is required";
-    if (!dvirForm) newErrors.dvirForm = "DVIR form is required";
-    if (fleetDistance === "custom" && !customValue)
-      newErrors.customValue = "Custom value required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+ 
+  const [documents, setDocuments] = useState<VehicleDocument[]>([]);
+
+  const handleDocumentSubmit = () => {
+    const newDoc: VehicleDocument = {
+      documentName,
+      customName,
+      expirationDate,
+      file,
+    };
+      setDocuments((prev) => [...prev, newDoc]);
+      resetDocumentForm()
+    console.log("Document Data:", newDoc);
+    setDocumentDialogOpen(false);
+  };
+
+  const handleRemoveDocument = (index: number) => {
+    setDocuments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = () => {
@@ -93,20 +210,11 @@ const AddVehicleDialog = ({
       dvirForm,
       fleetDistance,
       customValue,
-      documents,
+      documents, // full list of docs
     };
     onConfirm(data);
+    resetForm();
   };
-
-  const handleGpsChange = (index: number, value: string) => {
-    const updated = [...gpsDevices];
-    updated[index] = value;
-    setGpsDevices(updated);
-  };
-
-  const addGpsDevice = () => setGpsDevices([...gpsDevices, ""]);
-  const removeGpsDevice = (index: number) =>
-    setGpsDevices(gpsDevices.filter((_, i) => i !== index));
 
   const selectMenuProps = {
     PaperProps: {
@@ -122,7 +230,7 @@ const AddVehicleDialog = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleDialogClose} maxWidth="sm" fullWidth>
       <DialogTitle
         sx={{ fontWeight: "bold", bgcolor: "#121a26", color: "white" }}
       >
@@ -139,36 +247,38 @@ const AddVehicleDialog = ({
         </Typography>
 
         {/* Vehicle ID */}
-        <TextField
-          label="Vehicle ID"
-          required
-          value={vehicleId}
-          onChange={(e) => setVehicleId(e.target.value)}
-          error={!!errors.vehicleId}
-          helperText={errors.vehicleId}
-          fullWidth
-          sx={{ mb: 2 }}
-          InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{
-            style: { color: "white", backgroundColor: "#1e2630" },
-          }}
-        />
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Vehicle ID</InputLabel>
+          <Select
+            value={vehicleId}
+            onChange={(e) => setVehicleId(e.target.value)}
+            MenuProps={selectMenuProps}
+            sx={{ bgcolor: "#1e2630", color: "white" }}
+          >
+            {vehicleIdOptions?.map((id) => (
+              <MenuItem key={id} value={id}>
+                {id}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {/* VIN */}
-        <TextField
-          label="VIN"
-          required
-          value={vin}
-          onChange={(e) => setVin(e.target.value)}
-          error={!!errors.vin}
-          helperText={errors.vin}
-          fullWidth
-          sx={{ mb: 2 }}
-          InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{
-            style: { color: "white", backgroundColor: "#1e2630" },
-          }}
-        />
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: "white" }}>VIN</InputLabel>
+          <Select
+            value={vin}
+            onChange={(e) => setVin(e.target.value)}
+            MenuProps={selectMenuProps}
+            sx={{ bgcolor: "#1e2630", color: "white" }}
+          >
+            {vinOptions.map((vinOption) => (
+              <MenuItem key={vinOption} value={vinOption}>
+                {vinOption}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {/* Year */}
         <FormControl fullWidth sx={{ mb: 2 }}>
@@ -177,132 +287,141 @@ const AddVehicleDialog = ({
             value={year}
             onChange={(e) => setYear(e.target.value)}
             MenuProps={selectMenuProps}
-            input={<OutlinedInput label="Year" />}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            {[2025, 2024, 2023, 2022].map((y) => (
-              <MenuItem key={y} value={y}>
-                {y}
+            {yearOptions.map((yearOption) => (
+              <MenuItem key={yearOption} value={yearOption}>
+                {yearOption}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
         {/* Make */}
-        <TextField
-          label="Make"
-          value={make}
-          onChange={(e) => setMake(e.target.value)}
-          fullWidth
-          sx={{ mb: 2 }}
-          InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{
-            style: { color: "white", backgroundColor: "#1e2630" },
-          }}
-        />
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Make</InputLabel>
+          <Select
+            value={make}
+            onChange={(e) => setMake(e.target.value)}
+            MenuProps={selectMenuProps}
+            sx={{ bgcolor: "#1e2630", color: "white" }}
+          >
+            {makeOptions.map((makeOption) => (
+              <MenuItem key={makeOption} value={makeOption}>
+                {makeOption}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {/* Model */}
-        <TextField
-          label="Model"
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-          fullWidth
-          sx={{ mb: 2 }}
-          InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{
-            style: { color: "white", backgroundColor: "#1e2630" },
-          }}
-        />
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Model</InputLabel>
+          <Select
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            MenuProps={selectMenuProps}
+            sx={{ bgcolor: "#1e2630", color: "white" }}
+          >
+            {modelOptions.map((modelOption) => (
+              <MenuItem key={modelOption} value={modelOption}>
+                {modelOption}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {/* Color */}
-        <TextField
-          label="Color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          fullWidth
-          sx={{ mb: 2 }}
-          InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{
-            style: { color: "white", backgroundColor: "#1e2630" },
-          }}
-        />
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Color</InputLabel>
+          <Select
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            MenuProps={selectMenuProps}
+            sx={{ bgcolor: "#1e2630", color: "white" }}
+          >
+            {colorOptions.map((colorOption) => (
+              <MenuItem key={colorOption} value={colorOption}>
+                {colorOption}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {/* Fuel Type */}
-        <FormControl fullWidth sx={{ mb: 2 }} error={!!errors.fuelType}>
-          <InputLabel sx={{ color: "white" }} required>
-            Fuel Type
-          </InputLabel>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Fuel Type</InputLabel>
           <Select
             value={fuelType}
             onChange={(e) => setFuelType(e.target.value)}
             MenuProps={selectMenuProps}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            <MenuItem value="Diesel">Diesel</MenuItem>
-            <MenuItem value="Gasoline">Gasoline</MenuItem>
-            <MenuItem value="Electric">Electric</MenuItem>
+            {fuelTypeOptions.map((fuelOption) => (
+              <MenuItem key={fuelOption} value={fuelOption}>
+                {fuelOption}
+              </MenuItem>
+            ))}
           </Select>
-          {errors.fuelType && (
-            <Typography color="error" sx={{ fontSize: 12, mt: 0.5 }}>
-              {errors.fuelType}
-            </Typography>
-          )}
         </FormControl>
 
         {/* License State */}
         <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ color: "white" }}>License Issuing State</InputLabel>
+          <InputLabel sx={{ color: "white" }}>License State</InputLabel>
           <Select
             value={licenseState}
             onChange={(e) => setLicenseState(e.target.value)}
             MenuProps={selectMenuProps}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            <MenuItem value="CA">CA</MenuItem>
-            <MenuItem value="TX">TX</MenuItem>
-            <MenuItem value="NY">NY</MenuItem>
+            {licenseStateOptions.map((stateOption) => (
+              <MenuItem key={stateOption} value={stateOption}>
+                {stateOption}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
         {/* License Plate */}
-        <TextField
-          label="License Plate Number"
-          value={licensePlate}
-          onChange={(e) => setLicensePlate(e.target.value)}
-          fullWidth
-          sx={{ mb: 2 }}
-          InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{
-            style: { color: "white", backgroundColor: "#1e2630" },
-          }}
-        />
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: "white" }}>License Plate</InputLabel>
+          <Select
+            value={licensePlate}
+            onChange={(e) => setLicensePlate(e.target.value)}
+            MenuProps={selectMenuProps}
+            sx={{ bgcolor: "#1e2630", color: "white" }}
+          >
+            {licensePlateOptions.map((plateOption) => (
+              <MenuItem key={plateOption} value={plateOption}>
+                {plateOption}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {/* Company */}
-        <FormControl fullWidth sx={{ mb: 2 }} error={!!errors.company}>
-          <InputLabel sx={{ color: "white" }} required>
-            Company
-          </InputLabel>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: "white" }}>Company</InputLabel>
           <Select
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             MenuProps={selectMenuProps}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            <MenuItem value="Kench trucking llc">Kench trucking llc</MenuItem>
-            <MenuItem value="Other">Other</MenuItem>
+            {companyOptions.map((companyOption) => (
+              <MenuItem key={companyOption} value={companyOption}>
+                {companyOption}
+              </MenuItem>
+            ))}
           </Select>
-          {errors.company && (
-            <Typography color="error" sx={{ fontSize: 12, mt: 0.5 }}>
-              {errors.company}
-            </Typography>
-          )}
         </FormControl>
 
+        {/* Company Owned */}
         <FormControlLabel
           control={
             <Switch
               checked={companyOwned}
-              onChange={(e) => setCompanyOwned(e.target.checked)}
+              onChange={() => setCompanyOwned(!companyOwned)}
             />
           }
           label="Company Owned"
@@ -312,7 +431,13 @@ const AddVehicleDialog = ({
         {/* ================= ELD ================= */}
         <Typography
           variant="subtitle2"
-          sx={{ mt: 2, mb: 2, color: "#888", fontSize: 12, fontWeight: "bold" }}
+          sx={{
+            mt: 2,
+            mb: 2,
+            color: "#888",
+            fontSize: 12,
+            fontWeight: "bold",
+          }}
         >
           ELECTRONIC LOGGING DEVICE
         </Typography>
@@ -324,57 +449,46 @@ const AddVehicleDialog = ({
             MenuProps={selectMenuProps}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            <MenuItem value="ELD001">ELD001</MenuItem>
-            <MenuItem value="ELD002">ELD002</MenuItem>
+            <MenuItem value="No ELD device">No ELD device</MenuItem>
           </Select>
         </FormControl>
 
         {/* ================= GPS ================= */}
         <Typography
           variant="subtitle2"
-          sx={{ mt: 2, mb: 2, color: "#888", fontSize: 12, fontWeight: "bold" }}
+          sx={{
+            mt: 2,
+            mb: 2,
+            color: "#888",
+            fontSize: 12,
+            fontWeight: "bold",
+          }}
         >
           GPS TRACKING
         </Typography>
-        {gpsDevices.map((gps, index) => (
-          <div
-            key={index}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "8px",
-            }}
+
+        <FormControl fullWidth>
+          <InputLabel sx={{ color: "white" }}>GPS S/N</InputLabel>
+          <Select
+            value={gpsDevices}
+            onChange={(e) => setGpsDevices(e.target.value)}
+            MenuProps={selectMenuProps}
+            sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            <FormControl fullWidth>
-              <InputLabel sx={{ color: "white" }}>GPS S/N</InputLabel>
-              <Select
-                value={gps}
-                onChange={(e) => handleGpsChange(index, e.target.value)}
-                MenuProps={selectMenuProps}
-                sx={{ bgcolor: "#1e2630", color: "white" }}
-              >
-                <MenuItem value="GPS001">GPS001</MenuItem>
-                <MenuItem value="GPS002">GPS002</MenuItem>
-              </Select>
-            </FormControl>
-            {index > 0 && (
-              <IconButton
-                onClick={() => removeGpsDevice(index)}
-                sx={{ color: "white" }}
-              >
-                <Remove />
-              </IconButton>
-            )}
-          </div>
-        ))}
-        <Button onClick={addGpsDevice} sx={{ color: "#1669f2", mb: 2 }}>
-          + Add GPS Device
-        </Button>
+            <MenuItem value="No GPS device">No GPS device</MenuItem>
+          </Select>
+        </FormControl>
 
         {/* ================= TABLET ================= */}
         <Typography
           variant="subtitle2"
-          sx={{ mt: 2, mb: 2, color: "#888", fontSize: 12, fontWeight: "bold" }}
+          sx={{
+            mt: 2,
+            mb: 2,
+            color: "#888",
+            fontSize: 12,
+            fontWeight: "bold",
+          }}
         >
           TABLET
         </Typography>
@@ -386,15 +500,20 @@ const AddVehicleDialog = ({
             MenuProps={selectMenuProps}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            <MenuItem value="TBL001">TBL001</MenuItem>
-            <MenuItem value="TBL002">TBL002</MenuItem>
+            <MenuItem value="TBL001">No Tablet device</MenuItem>
           </Select>
         </FormControl>
 
         {/* ================= CAMERA ================= */}
         <Typography
           variant="subtitle2"
-          sx={{ mt: 2, mb: 2, color: "#888", fontSize: 12, fontWeight: "bold" }}
+          sx={{
+            mt: 2,
+            mb: 2,
+            color: "#888",
+            fontSize: 12,
+            fontWeight: "bold",
+          }}
         >
           CAMERA
         </Typography>
@@ -406,22 +525,25 @@ const AddVehicleDialog = ({
             MenuProps={selectMenuProps}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
-            <MenuItem value="CAM001">CAM001</MenuItem>
-            <MenuItem value="CAM002">CAM002</MenuItem>
+            <MenuItem value="No Camera device">No Camera device</MenuItem>
           </Select>
         </FormControl>
 
         {/* ================= DVIR FORM ================= */}
         <Typography
           variant="subtitle2"
-          sx={{ mt: 2, mb: 2, color: "#888", fontSize: 12, fontWeight: "bold" }}
+          sx={{
+            mt: 2,
+            mb: 2,
+            color: "#888",
+            fontSize: 12,
+            fontWeight: "bold",
+          }}
         >
           DVIR FORM
         </Typography>
         <FormControl fullWidth sx={{ mb: 2 }} error={!!errors.dvirForm}>
-          <InputLabel sx={{ color: "white" }} required>
-            DVIR Form
-          </InputLabel>
+          <InputLabel sx={{ color: "white" }}>DVIR Form</InputLabel>
           <Select
             value={dvirForm}
             onChange={(e) => setDvirForm(e.target.value)}
@@ -429,19 +551,19 @@ const AddVehicleDialog = ({
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="Default">Default</MenuItem>
-            <MenuItem value="Custom">Custom</MenuItem>
           </Select>
-          {errors.dvirForm && (
-            <Typography color="error" sx={{ fontSize: 12, mt: 0.5 }}>
-              {errors.dvirForm}
-            </Typography>
-          )}
         </FormControl>
 
         {/* ================= REPORTS ================= */}
         <Typography
           variant="subtitle2"
-          sx={{ mt: 2, mb: 2, color: "#888", fontSize: 12, fontWeight: "bold" }}
+          sx={{
+            mt: 2,
+            mb: 2,
+            color: "#888",
+            fontSize: 12,
+            fontWeight: "bold",
+          }}
         >
           REPORTS
         </Typography>
@@ -488,10 +610,50 @@ const AddVehicleDialog = ({
         {/* ================= DOCUMENTS ================= */}
         <Typography
           variant="subtitle2"
-          sx={{ mt: 2, mb: 2, color: "#888", fontSize: 12, fontWeight: "bold" }}
+          sx={{
+            mt: 2,
+            mb: 2,
+            color: "#888",
+            fontSize: 12,
+            fontWeight: "bold",
+          }}
         >
           DOCUMENTS
         </Typography>
+
+        {/* Show added documents */}
+        {documents.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            {documents.map((doc, index) => (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px 12px",
+                  marginBottom: 8,
+                  border: "1px solid #2a3442",
+                  borderRadius: 8,
+                  background: "#1e2630",
+                }}
+              >
+                <Typography sx={{ color: "white" }}>
+                  {doc.customName || doc.documentName}
+                  {doc.expirationDate && `(exp: ${doc.expirationDate})`}
+                </Typography>
+                <Button
+                  size="small"
+                  sx={{ color: "#f44336", textTransform: "none" }}
+                  onClick={() => handleRemoveDocument(index)}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
         <Button
           variant="outlined"
           startIcon={<Add />}
@@ -504,14 +666,97 @@ const AddVehicleDialog = ({
               backgroundColor: "rgba(22,105,242,0.1)",
             },
           }}
-          onClick={() => setDocuments([...documents, "New document"])}
+          onClick={handleDocumentDialogOpen}
         >
           Add Document
         </Button>
+
+        <Dialog
+          open={documentDialogOpen}
+          onClose={handleDocumentDialogClose}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle
+            sx={{ fontWeight: "bold", bgcolor: "#121a26", color: "white" }}
+          >
+            Add Document
+          </DialogTitle>
+          <DialogContent sx={{ bgcolor: "#121a26", color: "white" }}>
+            {/* Document Name */}
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel sx={{ color: "white" }}>Document Name</InputLabel>
+              <Select
+                value={documentName}
+                onChange={(e) => setDocumentName(e.target.value)}
+                sx={{ bgcolor: "#1e2630", color: "white" }}
+              >
+                {Object.values(DocumentName).map((docName) => (
+                  <MenuItem key={docName} value={docName}>
+                    {docName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {/* Custom Name */}
+            <TextField
+              label="Custom Name"
+              required
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+              InputLabelProps={{ sx: { color: "white" } }}
+              inputProps={{
+                style: { color: "white", backgroundColor: "#1e2630" },
+              }}
+            />
+            {/* Expiration Date */}
+            <TextField
+              label="Expiration Date"
+              type="date"
+              value={expirationDate}
+              onChange={(e) => setExpirationDate(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+              InputLabelProps={{ sx: { color: "white" } }}
+              inputProps={{
+                style: { color: "white", backgroundColor: "#1e2630" },
+              }}
+            />
+            {/* File Upload */}
+            <Button
+              variant="contained"
+              component="label"
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              Upload File
+              <input type="file" hidden onChange={handleFileChange} />
+            </Button>
+          </DialogContent>
+          <DialogActions sx={{ bgcolor: "#121a26" }}>
+            <Button onClick={handleDocumentDialogClose} sx={{ color: "#777" }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDocumentSubmit}
+              variant="contained"
+              sx={{
+                bgcolor: "#1669f2",
+                "&:hover": { bgcolor: "#1669f2" },
+                textTransform: "none",
+                fontWeight: "bold",
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
       </DialogContent>
 
       <DialogActions sx={{ bgcolor: "#121a26" }}>
-        <Button onClick={onClose} sx={{ color: "#777" }}>
+        <Button onClick={handleDialogClose} sx={{ color: "#777" }}>
           Cancel
         </Button>
         <Button

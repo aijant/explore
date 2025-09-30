@@ -14,7 +14,7 @@ import {
   OutlinedInput,
 } from "@mui/material";
 import { useGetVehiclesQuery } from "@store/services/vehicles.service";
-import { DocumentType } from "@store/models/enums/general.enums"; // update path as needed
+import { DocumentType } from "@store/models/enums/general.enums";
 
 const AddDocumentDialog = ({
   open,

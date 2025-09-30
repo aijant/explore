@@ -20,7 +20,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AddVehicleDialog from "./AddVehicleDialog";
 
-import { useGetVehiclesQuery } from "@store/services/vehicles.service";
+// import { useGetVehiclesQuery } from "@store/services/vehicles.service";
 
 // Sample vehicle data
 const vehicles = [
@@ -59,9 +59,9 @@ const VehiclesContent = () => {
     setDialogOpen(false);
   };
 
-  const { data: AllVehicles = [] } = useGetVehiclesQuery({});
+  // const { data: AllVehicles = [] } = useGetVehiclesQuery({});
 
-  console.log("AllVehicles", AllVehicles);
+  // console.log("AllVehicles", AllVehicles);
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
