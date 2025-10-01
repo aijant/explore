@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { FC, useState } from "react";
 import { Button, Menu, MenuItem, Popover, Typography } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -7,63 +7,61 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import useSignOut from "@hooks/useSignOut";
 import { isExpiringSoon } from "@/store/interceptor/token";
 
-const Header  = () => {
+const Header: FC = () => {
   const user = JSON.parse(localStorage.getItem("@auth") || "{}")?.user;
-    const accessToken = JSON.parse(
-      localStorage.getItem("@auth") || "{}"
+  const accessToken = JSON.parse(
+    localStorage.getItem("@auth") || "{}"
   )?.accessToken;
-  
+
   const { handleSignOut } = useSignOut();
 
+  // If token is expiring, sign out and return null to render nothing
   if (isExpiringSoon(accessToken)) {
-    console.log('isExpiring', accessToken)
-    return handleSignOut();
+    handleSignOut();
+    return null;
   }
 
+  // States for menus and popovers
   const [accountAnchorEl, setAccountAnchorEl] = useState<null | HTMLElement>(
     null
   );
-  const accountMenuOpen = Boolean(accountAnchorEl);
+  const [addAnchorEl, setAddAnchorEl] = useState<null | HTMLElement>(null);
+  const [notificationAnchorEl, setNotificationAnchorEl] =
+    useState<null | HTMLElement>(null);
+  const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedGroup, setSelectedGroup] = useState<string>("All Groups");
 
+  // Boolean open states
+  const accountMenuOpen = Boolean(accountAnchorEl);
+  const addMenuOpen = Boolean(addAnchorEl);
+  const notificationsOpen = Boolean(notificationAnchorEl);
+  const groupMenuOpen = Boolean(groupAnchorEl);
+
+  // Handlers
   const handleAccountMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAccountAnchorEl(event.currentTarget);
   };
-
   const handleAccountMenuClose = () => {
     setAccountAnchorEl(null);
   };
 
-  const [addAnchorEl, setAddAnchorEl] = useState<null | HTMLElement>(null);
-  const addMenuOpen = Boolean(addAnchorEl);
-
   const handleAddMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAddAnchorEl(event.currentTarget);
   };
-
   const handleAddMenuClose = () => {
     setAddAnchorEl(null);
   };
 
-  const [notificationAnchorEl, setNotificationAnchorEl] =
-    useState<null | HTMLElement>(null);
-  const notificationsOpen = Boolean(notificationAnchorEl);
-
   const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
     setNotificationAnchorEl(event.currentTarget);
   };
-
   const handleNotificationClose = () => {
     setNotificationAnchorEl(null);
   };
 
-  const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
-  const groupMenuOpen = Boolean(groupAnchorEl);
-  const [selectedGroup, setSelectedGroup] = useState("All Groups");
-
   const handleGroupMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setGroupAnchorEl(event.currentTarget);
   };
-
   const handleGroupMenuClose = () => {
     setGroupAnchorEl(null);
   };
@@ -76,9 +74,11 @@ const Header  = () => {
   return (
     <header className="h-[65px] flex items-center justify-between px-6 text-white border-b border-[#ffffff1a] bg-[#121212]">
       <div className="flex items-center">
+        {/* You can add a logo or navigation here if needed */}
       </div>
 
       <div className="flex items-center gap-[8px]">
+        {/* Group Selector */}
         <Button
           onClick={handleGroupMenuOpen}
           endIcon={<ArrowDropDownIcon />}
@@ -122,6 +122,7 @@ const Header  = () => {
           </MenuItem>
         </Menu>
 
+        {/* Add Button and Menu */}
         <Button
           variant="outlined"
           onClick={handleAddMenuOpen}
@@ -189,6 +190,7 @@ const Header  = () => {
           </div>
         </Popover>
 
+        {/* User Info */}
         {user?.id ? (
           <span className="text-[#fff]">
             {user.name} {user.surname}
@@ -197,6 +199,7 @@ const Header  = () => {
           <span className="text-[#fff]">Test Admin</span>
         )}
 
+        {/* Account Menu */}
         <Button color="primary" onClick={handleAccountMenuOpen}>
           <AccountCircleIcon />
         </Button>
