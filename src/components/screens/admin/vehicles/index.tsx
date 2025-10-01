@@ -9,12 +9,10 @@ import {
   TableRow,
   Paper,
   TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
   Button,
   IconButton,
+  Menu,
+  MenuItem as MenuOption,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -23,25 +21,51 @@ import toast from "react-hot-toast";
 
 import {
   useCreateVehiclesMutation,
+  useUpdateVehicleMutation,
   useGetVehiclesQuery,
+  useGetVehicleDocumentFileQuery,
 } from "@store/services/vehicles.service";
 
 const VehiclesContent = () => {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("Active");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
 
-  // Get all vehicles from API
   const { data: data = [], refetch } = useGetVehiclesQuery({});
   const AllVehicles = Array.isArray(data?.content) ? data.content : [];
-
-  console.log("AllVehicles", AllVehicles);
   const [createVehicles] = useCreateVehiclesMutation();
+  const [updateVehicle] = useUpdateVehicleMutation();
+  const { refetch: fetchDocumentFile } = useGetVehicleDocumentFileQuery(
+    undefined,
+    { skip: true }
+  );
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    vehicle: any
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedVehicle(vehicle);
+  };
+
+  const handleMenuClose = () => setAnchorEl(null);
+
+  const handleEdit = () => {
+    if (selectedVehicle) {
+      setEditMode(true);
+      setDialogOpen(true);
+    }
+    handleMenuClose();
+  };
+
+  const handleDeactivate = () => handleMenuClose();
 
   const handleAddVehicle = async (data: any) => {
     try {
       const formData = new FormData();
-
       const vehiclePayload = {
         vehicleId: data.vehicleId,
         vin: data.vin,
@@ -75,17 +99,68 @@ const VehiclesContent = () => {
         });
       }
 
-      await createVehicles(formData).unwrap();
+      if (editMode && selectedVehicle) {
+        await updateVehicle({
+          uuid: selectedVehicle.uuid,
+          body: formData,
+        }).unwrap();
+        toast.success("Vehicle updated!");
+      } else {
+        await createVehicles(formData).unwrap();
+        toast.success("Vehicle successfully saved!");
+      }
 
-      toast.success("Vehicle successfully saved!");
       setDialogOpen(false);
-
-      // REFRESH VEHICLES DATA
+      setEditMode(false);
+      setSelectedVehicle(null);
       refetch();
     } catch (err: any) {
       toast.error("Error saving vehicle!");
     }
   };
+
+  const filteredVehicles = AllVehicles.filter((vehicle) =>
+    String(vehicle.vehicleId).toLowerCase().includes(search.toLowerCase())
+  );
+
+ const handleExportCSV = () => {
+   const csvHeaders = [
+     "Vehicle ID",
+     "License Plate",
+     "ELD S/N",
+     "GPS S/N",
+     "Tablet S/N",
+     "Camera S/N",
+     "Groups",
+     "Documents Count",
+     "Status",
+   ];
+
+   const csvRows = filteredVehicles.map((v) => [
+     v.vehicleId ?? "",
+     v.licensePlateNumber ?? "",
+     v.eldSn ?? "",
+     v.gpsSn ?? "",
+     v.tabletSn ?? "",
+     v.cameraSn ?? "",
+     v.groups ?? "",
+     v.documents?.length ?? 0,
+     v.status ? "Active" : "Inactive",
+   ]);
+
+   const csvContent = [csvHeaders, ...csvRows]
+     .map((row) => row.map((val) => `"${val}"`).join(","))
+     .join("\n");
+
+   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+   const url = URL.createObjectURL(blob);
+   const a = document.createElement("a");
+   a.href = url;
+   a.download = `vehicles_export_${Date.now()}.csv`;
+   a.click();
+   URL.revokeObjectURL(url);
+ };
+
 
   return (
     <Box sx={{ p: 3, bgcolor: "#121a26", color: "white" }}>
@@ -101,36 +176,21 @@ const VehiclesContent = () => {
       >
         <TextField
           size="small"
-          placeholder="Search by Vehicle ID, ELD S/N or GPS S/N"
+          placeholder="Search by Vehicle ID"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ width: 350, bgcolor: "#1e2630", borderRadius: 1 }}
           InputProps={{ style: { color: "white" } }}
         />
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel sx={{ color: "white", fontSize: "12px" }}>
-            Filter by Status
-          </InputLabel>
-          <Select
-            value={statusFilter}
-            label="Filter by Status"
-            onChange={(e) => setStatusFilter(e.target.value)}
-            sx={{ bgcolor: "#1e2630", color: "white" }}
-            MenuProps={{
-              PaperProps: { sx: { bgcolor: "#1e2630", color: "white" } },
-            }}
-          >
-            <MenuItem value="Active">Active</MenuItem>
-            <MenuItem value="Inactive">Inactive</MenuItem>
-            <MenuItem value="All">All</MenuItem>
-          </Select>
-        </FormControl>
-
         <Box sx={{ marginLeft: "auto", display: "flex", gap: 1 }}>
           <Button
             variant="outlined"
-            onClick={() => setDialogOpen(true)}
+            onClick={() => {
+              setDialogOpen(true);
+              setEditMode(false);
+              setSelectedVehicle(null);
+            }}
             sx={{
               color: "#1669f2",
               borderColor: "#1669f2",
@@ -144,14 +204,9 @@ const VehiclesContent = () => {
             + Add Vehicle
           </Button>
 
-          <AddVehicleDialog
-            open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
-            onConfirm={handleAddVehicle}
-          />
-
           <Button
             variant="outlined"
+            onClick={handleExportCSV}
             sx={{
               color: "#1669f2",
               borderColor: "#1669f2",
@@ -162,7 +217,7 @@ const VehiclesContent = () => {
               "&:hover": { bgcolor: "#1669f230", borderColor: "#1669f2" },
             }}
           >
-            Export
+            Export CSV
           </Button>
 
           <IconButton sx={{ color: "white" }} onClick={() => refetch()}>
@@ -176,44 +231,27 @@ const VehiclesContent = () => {
         <Table sx={{ minWidth: 900 }} size="small" aria-label="vehicles table">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                VEHICLE ID ↑
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                LICENSE PLATE
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                ELD S/N ↑
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                GPS S/N
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                TABLET S/N
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                CAMERA S/N
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                GROUPS
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                DOCUMENTS
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                STATUS
-              </TableCell>
-              <TableCell
-                sx={{ color: "white", fontWeight: "bold" }}
-              ></TableCell>
+              {[
+                "VEHICLE ID ↑",
+                "LICENSE PLATE",
+                "ELD S/N ↑",
+                "GPS S/N",
+                "TABLET S/N",
+                "CAMERA S/N",
+                "GROUPS",
+                "DOCUMENTS",
+                "STATUS",
+                "",
+              ].map((header, i) => (
+                <TableCell key={i} sx={{ color: "white", fontWeight: "bold" }}>
+                  {header}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {AllVehicles.map((vehicle: any) => (
-              <TableRow
-                key={vehicle.vehicleId}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
+            {filteredVehicles.map((vehicle: any) => (
+              <TableRow key={vehicle.vehicleId}>
                 <TableCell sx={{ color: "white" }}>
                   {vehicle.vehicleId}
                 </TableCell>
@@ -230,20 +268,22 @@ const VehiclesContent = () => {
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>{vehicle.groups}</TableCell>
                 <TableCell sx={{ color: "white" }}>
-                  {vehicle.documents?.length || 0}
+                  {vehicle.documents?.length || ""}
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>
                   {vehicle.status ? "Active" : "Inactive"}
                 </TableCell>
                 <TableCell>
-                  <IconButton sx={{ color: "white" }}>
+                  <IconButton
+                    sx={{ color: "white" }}
+                    onClick={(e) => handleMenuOpen(e, vehicle)}
+                  >
                     <MoreVertIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>
             ))}
-
-            {AllVehicles.length === 0 && (
+            {filteredVehicles.length === 0 && (
               <TableRow>
                 <TableCell colSpan={10} align="center" sx={{ color: "white" }}>
                   No vehicles found.
@@ -253,6 +293,24 @@ const VehiclesContent = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Context Menu */}
+      <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
+        <MenuOption onClick={handleEdit}>Edit</MenuOption>
+        <MenuOption onClick={handleDeactivate}>Deactivate</MenuOption>
+      </Menu>
+
+      {/* Add/Edit Dialog */}
+      <AddVehicleDialog
+        open={dialogOpen}
+        onClose={() => {
+          setDialogOpen(false);
+          setEditMode(false);
+          setSelectedVehicle(null);
+        }}
+        onConfirm={handleAddVehicle}
+        initialData={editMode ? selectedVehicle : null}
+      />
     </Box>
   );
 };

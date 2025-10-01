@@ -5,10 +5,20 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import useSignOut from "@hooks/useSignOut";
+import { isExpiringSoon } from "@/store/interceptor/token";
 
 const Header: FC = () => {
   const user = JSON.parse(localStorage.getItem("@auth") || "{}")?.user;
+    const accessToken = JSON.parse(
+      localStorage.getItem("@auth") || "{}"
+  )?.accessToken;
+  
   const { handleSignOut } = useSignOut();
+
+  if (isExpiringSoon(accessToken)) {
+    console.log('isExpiring', accessToken)
+    return handleSignOut();
+  }
 
   const [accountAnchorEl, setAccountAnchorEl] = useState<null | HTMLElement>(
     null

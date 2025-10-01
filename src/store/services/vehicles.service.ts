@@ -35,7 +35,32 @@ export const vehiclesApi = createApi({
       }),
       invalidatesTags: ["vehicles"],
     }),
+
+    updateVehicle: builder.mutation<
+      VehicleWithDocRequest,
+      { uuid: string; body: FormData }
+    >({
+      query: ({ uuid, body }) => ({
+        url: `/api/vehicles-with-doc/${uuid}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["vehicles"],
+    }),
+    getVehicleDocumentFile: builder.query<Blob, { docUuid: string }>({
+      query: ({ docUuid }) => ({
+        url: `/api/vehicle-documents/${docUuid}/file`,
+        method: "GET",
+        responseHandler: (response) => response.blob(), // Ensure blob
+      }),
+      transformResponse: (response: Blob) => response,
+    }),
   }),
 });
 
-export const { useGetVehiclesQuery, useCreateVehiclesMutation } = vehiclesApi;
+export const {
+  useGetVehiclesQuery,
+  useCreateVehiclesMutation,
+  useUpdateVehicleMutation,
+  useGetVehicleDocumentFileQuery,
+} = vehiclesApi;

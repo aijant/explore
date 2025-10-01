@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -32,12 +32,14 @@ const AddVehicleDialog = ({
   open,
   onClose,
   onConfirm,
+  initialData,
 }: {
   open: boolean;
   onClose: () => void;
   onConfirm: (data: any) => void;
-}) => {
-  // ====== VEHICLE FIELDS ======
+  initialData?: any;
+  }) => {
+
   const [vehicleId, setVehicleId] = useState("");
   const [vin, setVin] = useState("");
   const [year, setYear] = useState("");
@@ -72,6 +74,33 @@ const AddVehicleDialog = ({
   const [file, setFile] = useState<File | null>(null);
 
   const [errors, setErrors] = useState<any>({});
+
+  useEffect(() => {
+    if (open && initialData) {
+      setVehicleId(initialData.vehicleId || "");
+      setVin(initialData.vin || "");
+      setYear(initialData.year || "");
+      setMake(initialData.make || "");
+      setModel(initialData.model || "");
+      setColor(initialData.color || "");
+      setFuelType(initialData.fuelType || "");
+      setLicenseState(initialData.licenseState || "");
+      setLicensePlate(initialData.licensePlate || "");
+      setCompany(initialData.company || "");
+      setCompanyOwned(initialData.companyOwned ?? true);
+
+      setEldSn(initialData.eldSn || "");
+      setGpsDevices(initialData.gpsDevices || "");
+      setTabletSn(initialData.tabletSn || "");
+      setCameraSn(initialData.cameraSn || "");
+      setDvirForm(initialData.dvirForm || "");
+
+      setFleetDistance(initialData.fleetDistance || "default");
+      setCustomValue(initialData.customValue || "");
+
+      setDocuments(initialData.documents || []);
+    }
+  }, [open, initialData]);
 
   const resetForm = () => {
     setVehicleId("");
@@ -149,6 +178,7 @@ const AddVehicleDialog = ({
 
   const handleSubmit = () => {
     if (!validate()) return;
+
     const data = {
       vehicleId,
       vin,
@@ -169,7 +199,9 @@ const AddVehicleDialog = ({
       fleetDistance,
       customValue,
       documents,
+      uuid: initialData?.uuid || null, // ✅ keep track if edit
     };
+
     onConfirm(data);
     resetForm();
   };
@@ -179,7 +211,7 @@ const AddVehicleDialog = ({
       <DialogTitle
         sx={{ fontWeight: "bold", bgcolor: "#121a26", color: "white" }}
       >
-        Add Vehicle
+        {initialData ? "Edit Vehicle" : "Add Vehicle"}
       </DialogTitle>
 
       <DialogContent dividers sx={{ bgcolor: "#121a26", color: "white" }}>
@@ -327,7 +359,6 @@ const AddVehicleDialog = ({
           <Select
             value={eldSn}
             onChange={(e) => setEldSn(e.target.value)}
-            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="No ELD device">No ELD device</MenuItem>
@@ -353,7 +384,6 @@ const AddVehicleDialog = ({
           <Select
             value={gpsDevices}
             onChange={(e) => setGpsDevices(e.target.value)}
-            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="No GPS device">No GPS device</MenuItem>
@@ -378,7 +408,6 @@ const AddVehicleDialog = ({
           <Select
             value={tabletSn}
             onChange={(e) => setTabletSn(e.target.value)}
-            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="TBL001">No Tablet device</MenuItem>
@@ -403,7 +432,6 @@ const AddVehicleDialog = ({
           <Select
             value={cameraSn}
             onChange={(e) => setCameraSn(e.target.value)}
-            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="No Camera device">No Camera device</MenuItem>
@@ -428,7 +456,6 @@ const AddVehicleDialog = ({
           <Select
             value={dvirForm}
             onChange={(e) => setDvirForm(e.target.value)}
-            
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             <MenuItem value="Default">Default</MenuItem>
