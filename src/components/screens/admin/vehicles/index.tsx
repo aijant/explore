@@ -23,14 +23,27 @@ import {
   useCreateVehiclesMutation,
   useUpdateVehicleMutation,
   useGetVehiclesQuery,
-  useGetVehicleDocumentFileQuery,
 } from "@store/services/vehicles.service";
+
+// Define Vehicle interface to use for typing
+interface Vehicle {
+  vehicleId: string;
+  licensePlateNumber?: string;
+  eldSn?: string;
+  gpsSn?: string;
+  tabletSn?: string;
+  cameraSn?: string;
+  groups?: string;
+  documents?: any[];
+  status?: boolean;
+  uuid?: string;
+}
 
 const VehiclesContent = () => {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
@@ -38,14 +51,10 @@ const VehiclesContent = () => {
   const AllVehicles = Array.isArray(data?.content) ? data.content : [];
   const [createVehicles] = useCreateVehiclesMutation();
   const [updateVehicle] = useUpdateVehicleMutation();
-  const { refetch: fetchDocumentFile } = useGetVehicleDocumentFileQuery(
-    undefined,
-    { skip: true }
-  );
 
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
-    vehicle: any
+    vehicle: Vehicle
   ) => {
     setAnchorEl(event.currentTarget);
     setSelectedVehicle(vehicle);
@@ -101,7 +110,7 @@ const VehiclesContent = () => {
 
       if (editMode && selectedVehicle) {
         await updateVehicle({
-          uuid: selectedVehicle.uuid,
+          uuid: selectedVehicle.uuid!,
           body: formData,
         }).unwrap();
         toast.success("Vehicle updated!");
@@ -119,48 +128,49 @@ const VehiclesContent = () => {
     }
   };
 
-  const filteredVehicles = AllVehicles.filter((vehicle) =>
+  const filteredVehicles = AllVehicles.filter((vehicle: Vehicle) =>
     String(vehicle.vehicleId).toLowerCase().includes(search.toLowerCase())
   );
 
- const handleExportCSV = () => {
-   const csvHeaders = [
-     "Vehicle ID",
-     "License Plate",
-     "ELD S/N",
-     "GPS S/N",
-     "Tablet S/N",
-     "Camera S/N",
-     "Groups",
-     "Documents Count",
-     "Status",
-   ];
+  const handleExportCSV = () => {
+    const csvHeaders = [
+      "Vehicle ID",
+      "License Plate",
+      "ELD S/N",
+      "GPS S/N",
+      "Tablet S/N",
+      "Camera S/N",
+      "Groups",
+      "Documents Count",
+      "Status",
+    ];
 
-   const csvRows = filteredVehicles.map((v) => [
-     v.vehicleId ?? "",
-     v.licensePlateNumber ?? "",
-     v.eldSn ?? "",
-     v.gpsSn ?? "",
-     v.tabletSn ?? "",
-     v.cameraSn ?? "",
-     v.groups ?? "",
-     v.documents?.length ?? 0,
-     v.status ? "Active" : "Inactive",
-   ]);
+    const csvRows = filteredVehicles.map((v: Vehicle) => [
+      v.vehicleId ?? "",
+      v.licensePlateNumber ?? "",
+      v.eldSn ?? "",
+      v.gpsSn ?? "",
+      v.tabletSn ?? "",
+      v.cameraSn ?? "",
+      v.groups ?? "",
+      v.documents?.length ?? 0,
+      v.status ? "Active" : "Inactive",
+    ]);
 
-   const csvContent = [csvHeaders, ...csvRows]
-     .map((row) => row.map((val) => `"${val}"`).join(","))
-     .join("\n");
+    const csvContent = [csvHeaders, ...csvRows]
+      .map((row: string[]) =>
+        row.map((val: string | number) => `"${val}"`).join(",")
+      )
+      .join("\n");
 
-   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-   const url = URL.createObjectURL(blob);
-   const a = document.createElement("a");
-   a.href = url;
-   a.download = `vehicles_export_${Date.now()}.csv`;
-   a.click();
-   URL.revokeObjectURL(url);
- };
-
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `vehicles_export_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Box sx={{ p: 3, bgcolor: "#121a26", color: "white" }}>
@@ -250,7 +260,7 @@ const VehiclesContent = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredVehicles.map((vehicle: any) => (
+            {filteredVehicles.map((vehicle: Vehicle) => (
               <TableRow key={vehicle.vehicleId}>
                 <TableCell sx={{ color: "white" }}>
                   {vehicle.vehicleId}

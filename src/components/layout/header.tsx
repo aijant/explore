@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { useState } from "react";
 import { Button, Menu, MenuItem, Popover, Typography } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -7,7 +7,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import useSignOut from "@hooks/useSignOut";
 import { isExpiringSoon } from "@/store/interceptor/token";
 
-const Header: FC = () => {
+const Header  = () => {
   const user = JSON.parse(localStorage.getItem("@auth") || "{}")?.user;
     const accessToken = JSON.parse(
       localStorage.getItem("@auth") || "{}"
