@@ -45,7 +45,7 @@ const CompanyContent = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
-  const { data, refetch } = useGetCompanyQuery();
+  const { data, refetch } = useGetCompanyQuery({});
   const companies: Company[] = Array.isArray(data?.content) ? data.content : [];
 
   const [createCompany] = useCreateCompanyMutation();

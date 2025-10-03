@@ -13,6 +13,7 @@ import {
   Typography,
   Switch,
   FormControlLabel,
+  SelectChangeEvent,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import {
@@ -59,13 +60,10 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
   const [expirationDate, setExpirationDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
-  // Handle form field changes
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }
-    >
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type, checked } = e.target as HTMLInputElement;
+    const { name, value, type, checked } = e.target;
     if (!name) return;
     setForm((prev) => ({
       ...prev,
@@ -73,7 +71,15 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
     }));
   };
 
-  // Document dialog handlers
+  const handleSelectChange = (e: SelectChangeEvent) => {
+    const { name, value } = e.target;
+    if (!name) return;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleDocumentDialogOpen = () => setDocumentDialogOpen(true);
   const handleDocumentDialogClose = () => {
     resetDocumentForm();
@@ -150,7 +156,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.companyName}
-            onChange={handleChange}
+            onChange={handleInputChange} 
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -161,7 +167,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.street}
-            onChange={handleChange}
+            onChange={handleInputChange} 
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -172,7 +178,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.city}
-            onChange={handleChange}
+            onChange={handleInputChange} 
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -183,7 +189,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             <Select
               name="state"
               value={form.state}
-              onChange={handleChange}
+              onChange={handleSelectChange} 
               sx={{ background: "#1e2630", color: "white" }}
             >
               <MenuItem value="">
@@ -204,7 +210,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.zip}
-            onChange={handleChange}
+            onChange={handleInputChange} 
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -215,7 +221,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.dot}
-            onChange={handleChange}
+            onChange={handleInputChange} 
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -226,7 +232,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.homeTerminalTimeZone}
-            onChange={handleChange}
+            onChange={handleInputChange} 
             placeholder="e.g. America/Chicago"
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
@@ -237,7 +243,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             <Select
               name="cycleRule"
               value={form.cycleRule}
-              onChange={handleChange}
+              onChange={handleSelectChange} 
               sx={{ background: "#1e2630", color: "white" }}
             >
               {Object.values(CycleRule).map((rule) => (
@@ -253,7 +259,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             <Select
               name="cargoType"
               value={form.cargoType}
-              onChange={handleChange}
+              onChange={handleSelectChange} 
               sx={{ background: "#1e2630", color: "white" }}
             >
               {Object.values(CargoType).map((type) => (
@@ -269,7 +275,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
               <Switch
                 checked={form.break30MinException}
                 name="break30MinException"
-                onChange={handleChange}
+                onChange={handleInputChange} 
               />
             }
             label="Break 30 Min Exception"
@@ -393,16 +399,16 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             <Button
               onClick={handleAddDocument}
               variant="contained"
-              sx={{ bgcolor: "#1669f2" }}
               disabled={
                 !documentName ||
+                (!customName &&
+                  documentName === CompanyDocumentName.CUSTOM_NAME) ||
                 !expirationDate ||
-                !file ||
-                (documentName === CompanyDocumentName.CUSTOM_NAME &&
-                  !customName)
+                !file
               }
+              sx={{ bgcolor: "#1669f2", fontWeight: "bold" }}
             >
-              Confirm
+              Add
             </Button>
           </DialogActions>
         </Dialog>
