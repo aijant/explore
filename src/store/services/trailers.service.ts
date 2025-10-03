@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "../interceptor";
-import { TrailerFormData,TrailerDocument } from "../models/interfaces/trailers.interfaces";
+import { TrailerDocument } from "../models/interfaces/trailers.interfaces";
 
 export const trailersApi = createApi({
   reducerPath: "trailersApi",
@@ -35,7 +35,7 @@ export const trailersApi = createApi({
       providesTags: ["trailers"],
     }),
 
-    createTrailer: builder.mutation<any, TrailerFormData>({
+    createTrailer: builder.mutation<any, FormData>({
       query: (body) => ({
         url: "/api/trailers-with-doc",
         method: "POST",
@@ -53,7 +53,7 @@ export const trailersApi = createApi({
     }),
 
     getTrailerDocument: builder.query<TrailerDocument[], string>({
-      query: (trailerId ) => ({
+      query: (trailerId) => ({
         url: `/api/trailers/${trailerId}/documents`,
         method: "GET",
       }),

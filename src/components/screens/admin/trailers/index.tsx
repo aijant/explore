@@ -32,6 +32,7 @@ interface Trailer {
   year?: number;
   vin?: string;
   plates?: string;
+  licensePlateNumber?: string;
   ownership?: string;
   suspension?: string;
   gpsSn?: string;
@@ -167,8 +168,7 @@ const TrailersContent = () => {
     ]);
 
     const csvContent = [csvHeaders, ...csvRows]
-      .map((row) => row.map((val) => `"${val ?? ""}"`).join(","))
-      .join("\n");
+      .map((val: string | number | undefined) => `"${val ?? ""}"`).join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const a = document.createElement("a");
