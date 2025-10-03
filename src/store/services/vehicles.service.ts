@@ -1,6 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "../interceptor";
-import { VehicleWithDocRequest } from "../models/interfaces/vehicles.interfaces";
+import {
+  VehicleWithDocRequest,
+  VehicleDocument,
+} from "../models/interfaces/vehicles.interfaces";
 
 
 export const vehiclesApi = createApi({
@@ -47,13 +50,11 @@ export const vehiclesApi = createApi({
       }),
       invalidatesTags: ["vehicles"],
     }),
-    getVehicleDocumentFile: builder.query<Blob, { docUuid: string }>({
-      query: ({ docUuid }) => ({
-        url: `/api/vehicle-documents/${docUuid}/file`,
-        method: "GET",
-        responseHandler: (response) => response.blob(), // Ensure blob
-      }),
-      transformResponse: (response: Blob) => response,
+    getVehicleDocument: builder.query<VehicleDocument, string>({
+      query: (docUuid) => ({
+        url: `/api/vehicles/${docUuid}/documents`,
+        method: "GET"
+      })
     }),
   }),
 });
@@ -62,5 +63,5 @@ export const {
   useGetVehiclesQuery,
   useCreateVehiclesMutation,
   useUpdateVehicleMutation,
-  useGetVehicleDocumentFileQuery,
+  useGetVehicleDocumentQuery,
 } = vehiclesApi;

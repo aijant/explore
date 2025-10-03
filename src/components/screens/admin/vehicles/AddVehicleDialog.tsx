@@ -15,6 +15,7 @@ import {
   InputLabel,
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
+import { useGetVehicleDocumentQuery } from "@store/services/vehicles.service";
 import {
   FuelType,
   UsState,
@@ -38,8 +39,7 @@ const AddVehicleDialog = ({
   onClose: () => void;
   onConfirm: (data: any) => void;
   initialData?: any;
-  }) => {
-
+}) => {
   const [vehicleId, setVehicleId] = useState("");
   const [vin, setVin] = useState("");
   const [year, setYear] = useState("");
@@ -101,6 +101,24 @@ const AddVehicleDialog = ({
       setDocuments(initialData.documents || []);
     }
   }, [open, initialData]);
+
+  const vehicleUuid = initialData?.uuid;
+  const { data: documentData } = useGetVehicleDocumentQuery(vehicleUuid, {
+    skip: !vehicleUuid,
+  });
+
+  useEffect(() => {
+    if (documentData && Array.isArray(documentData)) {
+      const mappedDocs = documentData.map((doc: any) => ({
+        documentName: doc.documentName as DocumentName,
+        customName: doc.customName,
+        expirationDate: doc.expirationDate,
+        file: doc.fileName,
+      }));
+
+      setDocuments(mappedDocs);
+    }
+  }, [documentData]);
 
   const resetForm = () => {
     setVehicleId("");
@@ -231,7 +249,9 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
         <TextField
           label="VIN"
@@ -241,7 +261,9 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
         <TextField
           label="Year"
@@ -251,7 +273,9 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
         <TextField
           label="Make"
@@ -260,7 +284,9 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
         <TextField
           label="Model"
@@ -269,7 +295,9 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
         <TextField
           label="Color"
@@ -278,7 +306,9 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
         <TextField
           label="License Plate"
@@ -287,7 +317,9 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
         <TextField
           label="Company"
@@ -296,7 +328,9 @@ const AddVehicleDialog = ({
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
-          inputProps={{ style: { color: "white", backgroundColor: "#1e2630" } }}
+          inputProps={{
+            style: { color: "white", backgroundColor: "#1e2630" },
+          }}
         />
 
         {/* ==== DROPDOWNS ==== */}
