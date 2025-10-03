@@ -136,47 +136,48 @@ const TrailersContent = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    const csvHeaders = [
-      "Trailer ID",
-      "Type",
-      "Make",
-      "Year",
-      "VIN",
-      "Plates",
-      "Ownership",
-      "Suspension",
-      "GPS S/N",
-      "Groups",
-      "Documents Count",
-      "Status",
-    ];
+ const handleExportCSV = () => {
+   const csvHeaders = [
+     "Trailer ID",
+     "Type",
+     "Make",
+     "Year",
+     "VIN",
+     "Plates",
+     "Ownership",
+     "Suspension",
+     "GPS S/N",
+     "Groups",
+     "Documents Count",
+     "Status",
+   ];
 
-    const csvRows = allTrailers.map((t: Trailer) => [
-      t.trailerId,
-      t.type,
-      t.make,
-      t.year,
-      t.vin,
-      t.licensePlateNumber,
-      t.ownership,
-      t.suspension,
-      t.gpsSn,
-      t.groups,
-      t.documents?.length ?? 0,
-      t.status ? "Active" : "Inactive",
-    ]);
+   const csvRows = allTrailers.map((t: Trailer) => [
+     t.trailerId || "",
+     t.type || "",
+     t.make || "",
+     t.year || "",
+     t.vin || "",
+     t.licensePlateNumber || "", // ✅ match field name
+     t.ownership || "",
+     t.suspension || "",
+     t.gpsSn || "",
+     t.groups || "",
+     (t.documents?.length ?? 0).toString(),
+     t.status ? "Active" : "Inactive",
+   ]);
 
-    const csvContent = [csvHeaders, ...csvRows]
-      .map((val: string | number | undefined) => `"${val ?? ""}"`).join("\n");
+   const csvContent = [csvHeaders, ...csvRows]
+     .map((row) => row.map((val) => `"${val}"`).join(","))
+     .join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `trailers_export_${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
+   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+   const a = document.createElement("a");
+   a.href = URL.createObjectURL(blob);
+   a.download = `trailers_export_${Date.now()}.csv`;
+   a.click();
+   URL.revokeObjectURL(a.href);
+ };
 
   const filteredTrailers = allTrailers.filter((t: Trailer) =>
     String(t.trailerId).toLowerCase().includes(search.toLowerCase())
