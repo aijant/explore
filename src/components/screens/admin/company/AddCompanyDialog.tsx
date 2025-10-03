@@ -60,16 +60,17 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
   const [expirationDate, setExpirationDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, type, checked } = e.target;
-    if (!name) return;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+ const handleInputChange = (
+   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+ ) => {
+   const target = e.target as HTMLInputElement; // cast here
+   const { name, value, type, checked } = target;
+   if (!name) return;
+   setForm((prev) => ({
+     ...prev,
+     [name]: type === "checkbox" ? checked : value,
+   }));
+ };
 
   const handleSelectChange = (e: SelectChangeEvent) => {
     const { name, value } = e.target;
@@ -156,7 +157,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.companyName}
-            onChange={handleInputChange} 
+            onChange={handleInputChange}
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -167,7 +168,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.street}
-            onChange={handleInputChange} 
+            onChange={handleInputChange}
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -178,7 +179,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.city}
-            onChange={handleInputChange} 
+            onChange={handleInputChange}
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -189,7 +190,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             <Select
               name="state"
               value={form.state}
-              onChange={handleSelectChange} 
+              onChange={handleSelectChange}
               sx={{ background: "#1e2630", color: "white" }}
             >
               <MenuItem value="">
@@ -210,7 +211,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.zip}
-            onChange={handleInputChange} 
+            onChange={handleInputChange}
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -221,7 +222,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.dot}
-            onChange={handleInputChange} 
+            onChange={handleInputChange}
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
           />
@@ -232,7 +233,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             fullWidth
             sx={{ mb: 2 }}
             value={form.homeTerminalTimeZone}
-            onChange={handleInputChange} 
+            onChange={handleInputChange}
             placeholder="e.g. America/Chicago"
             InputLabelProps={{ sx: { color: "white" } }}
             inputProps={{ style: { color: "white", background: "#1e2630" } }}
@@ -243,7 +244,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             <Select
               name="cycleRule"
               value={form.cycleRule}
-              onChange={handleSelectChange} 
+              onChange={handleSelectChange}
               sx={{ background: "#1e2630", color: "white" }}
             >
               {Object.values(CycleRule).map((rule) => (
@@ -259,7 +260,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             <Select
               name="cargoType"
               value={form.cargoType}
-              onChange={handleSelectChange} 
+              onChange={handleSelectChange}
               sx={{ background: "#1e2630", color: "white" }}
             >
               {Object.values(CargoType).map((type) => (
@@ -275,7 +276,7 @@ const AddCompanyDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
               <Switch
                 checked={form.break30MinException}
                 name="break30MinException"
-                onChange={handleInputChange} 
+                onChange={handleInputChange}
               />
             }
             label="Break 30 Min Exception"
