@@ -93,3 +93,30 @@ export enum UsState {
   WY = "WY",
   DC = "DC",
 }
+
+// trailer enums
+
+export enum Ownership {
+  Company = "Company",
+  Contractors = "Contractors",
+  Leased = "Leased",
+}
+
+export enum Suspension {
+  AirRide = "Air_Ride",
+  SpringRide = "Spring_Ride",
+}
+
+export enum TrailerDocumentName {
+  AnnualDOT = "AnnualDOT",
+  CustomName = "CustomName",
+}
+
+export enum TrailerType {
+  Conestoga = "Conestoga",
+  DryVan = "DryVan",
+  Flatbed = "Flatbed",
+  PO = "PO",
+  Reefer = "Reefer",
+}
+

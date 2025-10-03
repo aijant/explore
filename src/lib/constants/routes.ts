@@ -14,4 +14,5 @@ export const ROUTES = {
   admin: "/admin",
   documents: "/documents",
   adminVehicles: "/admin/vehicles",
+  adminTrailers: "/admin/trailers",
 };
