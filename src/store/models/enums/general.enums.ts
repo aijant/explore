@@ -120,3 +120,27 @@ export enum TrailerType {
   Reefer = "Reefer",
 }
 
+export enum CargoType {
+  PROPERTY = "PROPERTY",
+  PASSENGER = "PASSENGER",
+}
+
+export enum CompanyDocumentName {
+  MC_AUTHORITY = "MC_AUTHORITY",
+  INSURANCE = "INSURANCE",
+  IFTA = "IFTA",
+  TRANSFLO = "TRANSFLO",
+  KY_PERMIT = "KY_PERMIT",
+  NM_PERMIT = "NM_PERMIT",
+  NY_PERMIT = "NY_PERMIT",
+  COMPANY_INFO = "COMPANY_INFO",
+  EMERGENCY_PROCEDURE = "EMERGENCY_PROCEDURE",
+  CUSTOM_NAME = "CUSTOM_NAME",
+}
+
+export enum CycleRule {
+  USA_70_8 = "USA_70_8",
+  USA_60_7 = "USA_60_7",
+}
+
+

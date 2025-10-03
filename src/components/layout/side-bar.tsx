@@ -83,6 +83,7 @@ const NAV_LINKS: NavItem[] = [
       { label: "Drivers", href: ROUTES.admin, id: 14 },
       { label: "Vehicles", href: ROUTES.adminVehicles, id: 16 },
       { label: "Trailers", href: ROUTES.adminTrailers, id: 17 },
+      { label: "Company", href: ROUTES.adminCompany, id: 18 },
     ],
   },
 ];

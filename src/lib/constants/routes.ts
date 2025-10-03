@@ -15,4 +15,5 @@ export const ROUTES = {
   documents: "/documents",
   adminVehicles: "/admin/vehicles",
   adminTrailers: "/admin/trailers",
+  adminCompany: "/admin/company",
 };
