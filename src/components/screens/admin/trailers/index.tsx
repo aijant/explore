@@ -272,7 +272,7 @@ const TrailersContent = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredTrailers.map((t) => (
+            {filteredTrailers.map((t: Trailer) => (
               <TableRow key={t.trailerId}>
                 <TableCell sx={{ color: "white" }}>{t.trailerId}</TableCell>
                 <TableCell sx={{ color: "white" }}>{t.type}</TableCell>
