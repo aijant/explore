@@ -143,4 +143,16 @@ export enum CycleRule {
   USA_60_7 = "USA_60_7",
 }
 
+export enum DriverDocumentName {
+  MEDICAL_CARD = "MedicalCard",
+  CDL = "CDL",
+  CUSTOM_NAME = "CustomName",
+}
+
+export enum DriverType {
+  COMPANY_DRIVER = "CompanyDriver",
+  OWNER_OPERATOR = "OwnerOperator",
+  DRIVING_FOR_OWNER = "DrivingForOwner",
+  LEASE_TO_OWNERSHIP = "LeaseToOwnership",
+}
 
