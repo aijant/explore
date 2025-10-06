@@ -28,10 +28,13 @@ import {
 interface Company {
   uuid?: string;
   companyName: string;
-  address: string;
-  dotNumber: string;
-  smsNotifications: string;
-  terminalTimeZone: string;
+  street: string;
+  city: string;
+  dot: string;
+  homeTerminalTimeZone: string;
+  cycleRule: string;
+  cargoType: string;
+  break30MinException: boolean;
   documents?: any[];
   status?: boolean;
   createdDate?: string;
@@ -72,6 +75,8 @@ const CompanyContent = () => {
   const handleAddCompany = async (formData: any) => {
     try {
       const data = new FormData();
+
+      // 🔥 Match curl payload
       const companyPayload = {
         companyName: formData.company?.companyName || "",
         street: formData.company?.street || "",
@@ -123,9 +128,9 @@ const CompanyContent = () => {
   const handleExportCSV = () => {
     const headers = [
       "Company",
-      "Address",
+      "Street",
+      "City",
       "DOT #",
-      "SMS Notifications",
       "Time Zone",
       "Documents Count",
       "Status",
@@ -133,9 +138,9 @@ const CompanyContent = () => {
 
     const rows = companies.map((c) => [
       c.companyName,
+      c.street,
       c.city,
       c.dot,
-      c.smsNotifications,
       c.homeTerminalTimeZone,
       c.documents?.length ?? 0,
       c.status ? "Active" : "Inactive",
@@ -159,6 +164,7 @@ const CompanyContent = () => {
 
   return (
     <Box sx={{ p: 3, bgcolor: "#121a26", color: "white" }}>
+      {/* Header */}
       <Box
         sx={{
           display: "flex",
@@ -220,16 +226,17 @@ const CompanyContent = () => {
         </Box>
       </Box>
 
+      {/* Table */}
       <TableContainer component={Paper} sx={{ bgcolor: "#1e2630" }}>
         <Table size="small">
           <TableHead>
             <TableRow>
               {[
                 "COMPANY ↑",
-                "ADDRESS",
+                "STREET",
+                "CITY",
                 "DOT #",
-                "SMS NOTIFICATIONS",
-                "HOME TERMINAL TIME ZONE",
+                "TIME ZONE",
                 "DOCUMENTS",
                 "STATUS",
                 "",
@@ -244,22 +251,18 @@ const CompanyContent = () => {
             {filteredCompanies.map((c) => (
               <TableRow key={c.uuid}>
                 <TableCell sx={{ color: "white" }}>{c.companyName}</TableCell>
-                <TableCell sx={{ color: "white" }}>
-                  {c.city} {c.street}
-                </TableCell>
+                <TableCell sx={{ color: "white" }}>{c.street}</TableCell>
+                <TableCell sx={{ color: "white" }}>{c.city}</TableCell>
                 <TableCell sx={{ color: "white" }}>{c.dot}</TableCell>
-                <TableCell sx={{ color: "white" }}>
-                  {c.smsNotifications || "None"}
-                </TableCell>
                 <TableCell sx={{ color: "white" }}>
                   {c.homeTerminalTimeZone}
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>
-                  {c.documents?.length ?? ' '}
+                  {c.documents?.length ?? " "}
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>
                   {c.status
-                    ? `Active from ${new Date(
+                    ? `Active since ${new Date(
                         c.createdDate!
                       ).toLocaleDateString()}`
                     : "Inactive"}
