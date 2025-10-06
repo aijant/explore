@@ -101,6 +101,7 @@ const TrailersContent = () => {
       };
 
       formData.append("trailer", JSON.stringify(trailerPayload));
+      
       if (Array.isArray(data.documents)) {
         data.documents.forEach((doc: any) => {
           if (doc.file instanceof File) {

@@ -36,7 +36,7 @@ interface Company {
   status?: boolean;
   createdDate?: string;
 }
-//TODO
+
 const CompanyContent = () => {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -69,54 +69,56 @@ const CompanyContent = () => {
     handleMenuClose();
   };
 
- const handleAddCompany = async (formData: any) => {
-   try {
-     const data = new FormData();
-     const companyPayload = {
-       companyName: formData.companyName,
-       address: formData.address,
-       dotNumber: formData.dotNumber,
-       smsNotifications: formData.smsNotifications,
-       terminalTimeZone: formData.terminalTimeZone,
-       status: formData.status
-     };
-     data.append("company", JSON.stringify(companyPayload));
+  const handleAddCompany = async (formData: any) => {
+    try {
+      const data = new FormData();
+      const companyPayload = {
+        companyName: formData.company?.companyName || "",
+        street: formData.company?.street || "",
+        city: formData.company?.city || "",
+        dot: formData.company?.dot || "",
+        homeTerminalTimeZone: formData.company?.homeTerminalTimeZone || "",
+        cycleRule: formData.company?.cycleRule || "",
+        cargoType: formData.company?.cargoType || "",
+        break30MinException: formData.company?.break30MinException || false,
+      };
 
-     if (Array.isArray(formData.documents)) {
-       formData.documents.forEach((doc: any, idx: number) => {
-         if (doc.file instanceof File) {
-           data.append(`documents[${idx}][documentName]`, doc.documentName);
-           data.append(`documents[${idx}][customName]`, doc.customName || "");
-           data.append(
-             `documents[${idx}][expirationDate]`,
-             new Date(doc.expirationDate).toISOString()
-           );
-           data.append(`documents[${idx}][file]`, doc.file, doc.file.name);
-         }
-       });
-     }
+      data.append("company", JSON.stringify(companyPayload));
 
-     if (editMode && selectedCompany) {
-       await updateCompany({
-         uuid: selectedCompany.uuid!,
-         body: data,
-       }).unwrap();
-       toast.success("Company updated!");
-     } else {
-       await createCompany(data).unwrap();
-       toast.success("Company created!");
-     }
+      if (Array.isArray(formData.documents)) {
+        formData.documents.forEach((doc: any) => {
+          if (doc.file instanceof File) {
+            data.append("documentName", doc.documentName);
+            data.append("customName", doc.customName || "");
+            data.append(
+              "expirationDate",
+              new Date(doc.expirationDate).toISOString()
+            );
+            data.append("file", doc.file, doc.file.name);
+          }
+        });
+      }
 
-     setDialogOpen(false);
-     setEditMode(false);
-     setSelectedCompany(null);
-     refetch();
-   } catch (err: any) {
-     console.error("Company save error:", err);
-     toast.error("Error saving company!");
-   }
- };
+      if (editMode && selectedCompany) {
+        await updateCompany({
+          uuid: selectedCompany.uuid!,
+          body: data,
+        }).unwrap();
+        toast.success("Company updated!");
+      } else {
+        await createCompany(data).unwrap();
+        toast.success("Company created!");
+      }
 
+      setDialogOpen(false);
+      setEditMode(false);
+      setSelectedCompany(null);
+      refetch();
+    } catch (err: any) {
+      console.error("Company save error:", err);
+      toast.error("Error saving company!");
+    }
+  };
 
   const handleExportCSV = () => {
     const headers = [
@@ -131,10 +133,10 @@ const CompanyContent = () => {
 
     const rows = companies.map((c) => [
       c.companyName,
-      c.address,
-      c.dotNumber,
+      c.city,
+      c.dot,
       c.smsNotifications,
-      c.terminalTimeZone,
+      c.homeTerminalTimeZone,
       c.documents?.length ?? 0,
       c.status ? "Active" : "Inactive",
     ]);
@@ -212,7 +214,7 @@ const CompanyContent = () => {
             Export CSV
           </Button>
 
-          <IconButton sx={{ color: "white" }} onClick={refetch}>
+          <IconButton sx={{ color: "white" }} onClick={() => refetch()}>
             <RefreshIcon />
           </IconButton>
         </Box>
@@ -242,16 +244,18 @@ const CompanyContent = () => {
             {filteredCompanies.map((c) => (
               <TableRow key={c.uuid}>
                 <TableCell sx={{ color: "white" }}>{c.companyName}</TableCell>
-                <TableCell sx={{ color: "white" }}>{c.address}</TableCell>
-                <TableCell sx={{ color: "white" }}>{c.dotNumber}</TableCell>
+                <TableCell sx={{ color: "white" }}>
+                  {c.city} {c.street}
+                </TableCell>
+                <TableCell sx={{ color: "white" }}>{c.dot}</TableCell>
                 <TableCell sx={{ color: "white" }}>
                   {c.smsNotifications || "None"}
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>
-                  {c.terminalTimeZone}
+                  {c.homeTerminalTimeZone}
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>
-                  {c.documents?.length ?? 0}
+                  {c.documents?.length ?? ' '}
                 </TableCell>
                 <TableCell sx={{ color: "white" }}>
                   {c.status
@@ -284,7 +288,6 @@ const CompanyContent = () => {
 
       <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
         <MenuOption onClick={handleEdit}>Edit</MenuOption>
-        <MenuOption onClick={handleMenuClose}>Deactivate</MenuOption>
       </Menu>
 
       <AddCompanyDialog

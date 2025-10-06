@@ -70,7 +70,7 @@ const AddTrailersDialog = ({
   const [pendingAction, setPendingAction] = useState<
     "cancel" | "confirm" | null
   >(null);
-
+  
   const trailerId = initialData?.uuid;
 
   const { data: documentData } = useGetTrailerDocumentQuery(trailerId, {
@@ -89,6 +89,7 @@ const AddTrailersDialog = ({
       setDocuments(mappedDocs);
     }
   }, [documentData]);
+
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;

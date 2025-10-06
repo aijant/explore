@@ -28,7 +28,7 @@ export const companyApi = createApi({
           method: "GET",
         };
       },
-      providesTags: ["company"],
+      providesTags: () => ['company'],
     }),
 
     createCompany: builder.mutation<any, FormData>({
@@ -37,15 +37,16 @@ export const companyApi = createApi({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["company"],
+      invalidatesTags: ['company'],
     }),
+
     updateCompany: builder.mutation<any, { uuid: string; body: FormData }>({
       query: ({ uuid, body }) => ({
         url: `/api/companies-with-doc/${uuid}`,
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["company"],
+      invalidatesTags: ['company'],
     }),
 
     getCompanyDocument: builder.query<any[], string>({
