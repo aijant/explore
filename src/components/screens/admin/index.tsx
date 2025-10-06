@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Box,
-  Typography,
   Table,
   TableHead,
   TableBody,
@@ -10,23 +9,15 @@ import {
   TableRow,
   Paper,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Button,
   IconButton,
-  Stack,
-  Tooltip,
   Menu,
   MenuItem as DropdownItem,
-  Avatar,
 } from "@mui/material";
-import PhoneIcon from "@mui/icons-material/Phone";
-import AppleIcon from "@mui/icons-material/Apple";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import toast from "react-hot-toast";
+
 import AddDriverDialog from "./AddDriverDialog";
 import {
   useGetDriverQuery,
@@ -36,10 +27,8 @@ import {
 
 const AdminContent = () => {
   const [search, setSearch] = useState("");
-  const [driverStatusFilter, setDriverStatusFilter] = useState("Active");
-  const [specialDutyFilter, setSpecialDutyFilter] = useState("All Drivers");
   const [dialogOpen, setDialogOpen] = useState(false);
-   const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [editDriver, setEditDriver] = useState<any | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
@@ -62,6 +51,7 @@ const AdminContent = () => {
   const handleEdit = () => {
     if (selectedDriver) {
       setEditDriver(selectedDriver);
+      setEditMode(true);
       setDialogOpen(true);
       handleMenuClose();
     }
@@ -69,6 +59,7 @@ const AdminContent = () => {
 
   const handleAdd = () => {
     setEditDriver(null);
+    setEditMode(false);
     setDialogOpen(true);
   };
 
@@ -144,11 +135,12 @@ const AdminContent = () => {
   const drivers = driversData?.data || [];
 
   const filteredDrivers = drivers.filter((driver: any) => {
-    const matchesSearch =
-      driver.name?.toLowerCase().includes(search.toLowerCase()) ||
-      driver.email?.toLowerCase().includes(search.toLowerCase()) ||
-      driver.vehicle?.toLowerCase().includes(search.toLowerCase());
-    return matchesSearch;
+    const searchValue = search.toLowerCase();
+    return (
+      driver.name?.toLowerCase().includes(searchValue) ||
+      driver.email?.toLowerCase().includes(searchValue) ||
+      driver.vehicle?.toLowerCase().includes(searchValue)
+    );
   });
 
   return (
@@ -217,7 +209,7 @@ const AdminContent = () => {
                 <TableCell sx={{ color: "white" }}>{driver.name}</TableCell>
                 <TableCell sx={{ color: "white" }}>{driver.email}</TableCell>
                 <TableCell sx={{ color: "white" }}>
-                  {driver.status || "Active"}
+                  {driver.status ? "Active" : "Inactive"}
                 </TableCell>
                 <TableCell>
                   <IconButton
@@ -233,7 +225,7 @@ const AdminContent = () => {
         </Table>
       </TableContainer>
 
-      {/* Menu */}
+      {/* Actions Menu */}
       <Menu
         anchorEl={anchorEl}
         open={openMenu}
