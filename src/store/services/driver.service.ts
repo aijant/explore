@@ -6,7 +6,7 @@ export const driverApi = createApi({
   tagTypes: ["driver"],
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    getDriver: builder.query<any, void>({
+    getDriver: builder.query<any, any>({
       query: () => {
         return {
           url: `/api/drivers?status=&name=&email=&allowYardMove=&allowPersonalConveyance=&page=0&size=50`,
