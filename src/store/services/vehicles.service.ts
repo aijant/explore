@@ -44,7 +44,7 @@ export const vehiclesApi = createApi({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Vehicles"],
+      invalidatesTags: ["vehicles"],
     }),
     getVehicleDocument: builder.query<VehicleDocument, string>({
       query: (docUuid) => ({

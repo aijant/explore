@@ -167,7 +167,9 @@ const VehiclesContent = () => {
     ]);
 
     const csvContent = [csvHeaders, ...csvRows]
-      .map((row) => row.map((val) => `"${val}"`).join(","))
+      .map((row: (string | number)[]) =>
+        row.map((val: string | number) => `"${val}"`).join(",")
+      )
       .join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
