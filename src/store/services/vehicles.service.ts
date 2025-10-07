@@ -5,7 +5,6 @@ import {
   VehicleDocument,
 } from "../models/interfaces/vehicles.interfaces";
 
-
 export const vehiclesApi = createApi({
   reducerPath: "vehiclesApi",
   tagTypes: ["vehicles"],
@@ -39,22 +38,19 @@ export const vehiclesApi = createApi({
       invalidatesTags: ["vehicles"],
     }),
 
-    updateVehicle: builder.mutation<
-      VehicleWithDocRequest,
-      { uuid: string; body: FormData }
-    >({
+    updateVehicle: builder.mutation<any, { uuid: string; body: FormData }>({
       query: ({ uuid, body }) => ({
         url: `/api/vehicles-with-doc/${uuid}`,
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["vehicles"],
+      invalidatesTags: ["Vehicles"],
     }),
     getVehicleDocument: builder.query<VehicleDocument, string>({
       query: (docUuid) => ({
         url: `/api/vehicles/${docUuid}/documents`,
-        method: "GET"
-      })
+        method: "GET",
+      }),
     }),
   }),
 });

@@ -25,7 +25,6 @@ import {
   useGetVehiclesQuery,
 } from "@store/services/vehicles.service";
 
-// Define Vehicle interface to use for typing
 interface Vehicle {
   vehicleId: string;
   licensePlateNumber?: string;
@@ -49,6 +48,7 @@ const VehiclesContent = () => {
 
   const { data: data = [], refetch } = useGetVehiclesQuery({});
   const AllVehicles = Array.isArray(data?.content) ? data.content : [];
+
   const [createVehicles] = useCreateVehiclesMutation();
   const [updateVehicle] = useUpdateVehicleMutation();
 
@@ -70,11 +70,15 @@ const VehiclesContent = () => {
     handleMenuClose();
   };
 
-  const handleDeactivate = () => handleMenuClose();
+  const handleDeactivate = () => {
+    toast("Deactivate feature not implemented yet.");
+    handleMenuClose();
+  };
 
   const handleAddVehicle = async (data: any) => {
     try {
       const formData = new FormData();
+
       const vehiclePayload = {
         vehicleId: data.vehicleId,
         vin: data.vin,
@@ -85,8 +89,8 @@ const VehiclesContent = () => {
         fuelType: data.fuelType,
         fleetRequestedDistance:
           data.fleetDistance === "custom" ? Number(data.customValue) : 500,
-        licenseIssuingState: data.licenseState,
-        licensePlateNumber: data.licensePlate,
+        licenseIssuingState: data.licenseIssuingState,
+        licensePlateNumber: data.licensePlateNumber,
         company: data.company,
         companyOwned: Boolean(data.companyOwned),
         status: data.status ?? true,
@@ -96,35 +100,40 @@ const VehiclesContent = () => {
 
       if (Array.isArray(data.documents)) {
         data.documents.forEach((doc: any) => {
-          formData.append("documentName", doc.documentName);
-          formData.append("customName", doc.customName || "");
-          formData.append(
-            "expirationDate",
-            new Date(doc.expirationDate).toISOString()
-          );
-          if (doc.file) {
+          if (doc.file instanceof File) {
+            formData.append("documentName", doc.documentName || "");
+            formData.append("customName", doc.customName || "");
+            formData.append(
+              "expirationDate",
+              doc.expirationDate
+                ? new Date(doc.expirationDate).toISOString()
+                : ""
+            );
             formData.append("file", doc.file, doc.file.name);
           }
         });
       }
 
-      if (editMode && selectedVehicle) {
+      if (editMode && selectedVehicle?.uuid) {
         await updateVehicle({
-          uuid: selectedVehicle.uuid!,
+          uuid: selectedVehicle.uuid,
           body: formData,
         }).unwrap();
-        toast.success("Vehicle updated!");
+        toast.success("Vehicle updated successfully!");
       } else {
         await createVehicles(formData).unwrap();
-        toast.success("Vehicle successfully saved!");
+        toast.success("Vehicle created successfully!");
       }
 
       setDialogOpen(false);
       setEditMode(false);
       setSelectedVehicle(null);
       refetch();
-    } catch (err: any) {
-      toast.error("Error saving vehicle!");
+    } catch (error: any) {
+      console.error("Vehicle save error:", error);
+      toast.error(
+        error?.data?.message || "Failed to save vehicle. Check your input."
+      );
     }
   };
 
@@ -158,23 +167,20 @@ const VehiclesContent = () => {
     ]);
 
     const csvContent = [csvHeaders, ...csvRows]
-      .map((row: string[]) =>
-        row.map((val: string | number) => `"${val}"`).join(",")
-      )
+      .map((row) => row.map((val) => `"${val}"`).join(","))
       .join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `vehicles_export_${Date.now()}.csv`;
-    a.click();
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `vehicles_export_${Date.now()}.csv`;
+    link.click();
     URL.revokeObjectURL(url);
   };
 
   return (
     <Box sx={{ p: 3, bgcolor: "#121a26", color: "white" }}>
-      {/* Filters */}
       <Box
         sx={{
           display: "flex",
@@ -236,9 +242,8 @@ const VehiclesContent = () => {
         </Box>
       </Box>
 
-      {/* Table */}
       <TableContainer component={Paper} sx={{ bgcolor: "#1e2630" }}>
-        <Table sx={{ minWidth: 900 }} size="small" aria-label="vehicles table">
+        <Table sx={{ minWidth: 900 }} size="small">
           <TableHead>
             <TableRow>
               {[
@@ -259,9 +264,10 @@ const VehiclesContent = () => {
               ))}
             </TableRow>
           </TableHead>
+
           <TableBody>
             {filteredVehicles.map((vehicle: Vehicle) => (
-              <TableRow key={vehicle.vehicleId}>
+              <TableRow key={vehicle.uuid || vehicle.vehicleId}>
                 <TableCell sx={{ color: "white" }}>
                   {vehicle.vehicleId}
                 </TableCell>
@@ -276,7 +282,9 @@ const VehiclesContent = () => {
                 <TableCell sx={{ color: "white" }}>
                   {vehicle.cameraSn}
                 </TableCell>
-                <TableCell sx={{ color: "white" }}>{vehicle.groups}</TableCell>
+                <TableCell sx={{ color: "white" }}>
+                  {vehicle.groups || "Unassigned"}
+                </TableCell>
                 <TableCell sx={{ color: "white" }}>
                   {vehicle.documents?.length || ""}
                 </TableCell>
@@ -293,6 +301,7 @@ const VehiclesContent = () => {
                 </TableCell>
               </TableRow>
             ))}
+
             {filteredVehicles.length === 0 && (
               <TableRow>
                 <TableCell colSpan={10} align="center" sx={{ color: "white" }}>
@@ -304,13 +313,11 @@ const VehiclesContent = () => {
         </Table>
       </TableContainer>
 
-      {/* Context Menu */}
       <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
         <MenuOption onClick={handleEdit}>Edit</MenuOption>
         <MenuOption onClick={handleDeactivate}>Deactivate</MenuOption>
       </Menu>
 
-      {/* Add/Edit Dialog */}
       <AddVehicleDialog
         open={dialogOpen}
         onClose={() => {
@@ -319,7 +326,7 @@ const VehiclesContent = () => {
           setSelectedVehicle(null);
         }}
         onConfirm={handleAddVehicle}
-        initialData={editMode ? selectedVehicle : null}
+        initialData={editMode && selectedVehicle ? selectedVehicle : null}
       />
     </Box>
   );

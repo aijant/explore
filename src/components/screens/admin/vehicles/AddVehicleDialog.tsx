@@ -47,8 +47,8 @@ const AddVehicleDialog = ({
   const [model, setModel] = useState("");
   const [color, setColor] = useState("");
   const [fuelType, setFuelType] = useState("");
-  const [licenseState, setLicenseState] = useState("");
-  const [licensePlate, setLicensePlate] = useState("");
+  const [licenseIssuingState, setlicenseIssuingState] = useState("");
+  const [licensePlateNumber, setlicensePlateNumber] = useState("");
   const [company, setCompany] = useState("");
   const [companyOwned, setCompanyOwned] = useState(true);
 
@@ -84,8 +84,8 @@ const AddVehicleDialog = ({
       setModel(initialData.model || "");
       setColor(initialData.color || "");
       setFuelType(initialData.fuelType || "");
-      setLicenseState(initialData.licenseState || "");
-      setLicensePlate(initialData.licensePlate || "");
+      setlicenseIssuingState(initialData.licenseIssuingState || "");
+      setlicensePlateNumber(initialData.licensePlateNumber || "");
       setCompany(initialData.company || "");
       setCompanyOwned(initialData.companyOwned ?? true);
 
@@ -128,8 +128,8 @@ const AddVehicleDialog = ({
     setModel("");
     setColor("");
     setFuelType("");
-    setLicenseState("");
-    setLicensePlate("");
+    setlicenseIssuingState("");
+    setlicensePlateNumber("");
     setCompany("");
     setCompanyOwned(true);
 
@@ -205,8 +205,8 @@ const AddVehicleDialog = ({
       model,
       color,
       fuelType,
-      licenseState,
-      licensePlate,
+      licenseIssuingState,
+      licensePlateNumber,
       company,
       companyOwned,
       eldSn,
@@ -312,8 +312,8 @@ const AddVehicleDialog = ({
         />
         <TextField
           label="License Plate"
-          value={licensePlate}
-          onChange={(e) => setLicensePlate(e.target.value)}
+          value={licensePlateNumber}
+          onChange={(e) => setlicensePlateNumber(e.target.value)}
           fullWidth
           sx={{ mb: 2 }}
           InputLabelProps={{ sx: { color: "white" } }}
@@ -352,8 +352,8 @@ const AddVehicleDialog = ({
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel sx={{ color: "white" }}>License State</InputLabel>
           <Select
-            value={licenseState}
-            onChange={(e) => setLicenseState(e.target.value)}
+            value={licenseIssuingState}
+            onChange={(e) => setlicenseIssuingState(e.target.value)}
             sx={{ bgcolor: "#1e2630", color: "white" }}
           >
             {Object.values(UsState).map((state) => (
