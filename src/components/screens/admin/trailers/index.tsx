@@ -51,10 +51,9 @@ const TrailersContent = () => {
   const menuOpen = Boolean(anchorEl);
 
   const { data, refetch } = useGetTrailersQuery({
-    trailerId: "TRL",
+    trailerId: "",
     page: 0,
-    size: 50,
-    status: true,
+    size: 50
   });
 
   const allTrailers = Array.isArray(data?.content) ? data.content : [];

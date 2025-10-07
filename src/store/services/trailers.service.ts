@@ -13,7 +13,6 @@ export const trailersApi = createApi({
         page?: number;
         size?: number;
         trailerId?: string;
-        status?: boolean;
       }
     >({
       query: (params = {}) => {
@@ -24,11 +23,9 @@ export const trailersApi = createApi({
           query.append("page", params.page.toString());
         if (params.size !== undefined)
           query.append("size", params.size.toString());
-        if (params.status !== undefined)
-          query.append("status", String(params.status)); // Convert boolean to string
 
         return {
-          url: `/api/trailers?${query.toString()}`,
+          url: `/api/trailers?status=&${query.toString()}`,
           method: "GET",
         };
       },
