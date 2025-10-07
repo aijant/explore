@@ -6,34 +6,10 @@ export const driverApi = createApi({
   tagTypes: ["driver"],
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
-    getDriver: builder.query<
-      any,
-      {
-        status?: boolean;
-        name?: string;
-        email?: string;
-        allowYardMove?: boolean;
-        allowPersonalConveyance?: boolean;
-        page?: string | number;
-        size?: string | number;
-      }
-    >({
-      query: (params = {}) => {
-        const query = new URLSearchParams();
-
-        query.append("status", params.status.toString());
-        query.append("name", params.name);
-        query.append("email", params.email);
-        query.append("allowYardMove", params.allowYardMove.toString());
-        query.append(
-          "allowPersonalConveyance",
-          params.allowPersonalConveyance.toString()
-        );
-        query.append("page", params.page.toString());
-        query.append("size", params.size.toString());
-
+    getDriver: builder.query<any>({
+      query: () => {
         return {
-          url: `/api/drivers?${query.toString()}`,
+          url: `/api/drivers?status=&name=&email=&allowYardMove=&allowPersonalConveyance=&page=0&size=50`,
           method: "GET",
         };
       },

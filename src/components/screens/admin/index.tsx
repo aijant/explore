@@ -31,9 +31,7 @@ import {
   useCreateDriverMutation,
   useUpdateDriverMutation,
 } from "@store/services/driver.service";
-import {
-  useGetVehiclesQuery,
-} from "@store/services/vehicles.service";
+import { useGetVehiclesQuery } from "@store/services/vehicles.service";
 
 const AdminContent = () => {
   const [search, setSearch] = useState("");
@@ -44,18 +42,12 @@ const AdminContent = () => {
   const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
   const openMenu = Boolean(anchorEl);
 
-  const { data: driversData, refetch } = useGetDriverQuery({
-    status: "",
-    name: "",
-    email: "",
-    allowYardMove: "",
-    allowPersonalConveyance: "",
-    page: "",
-    size: "",
-  });
+  const { data: driversData, refetch } = useGetDriverQuery({});
 
-  const { data: data = [] } = useGetVehiclesQuery({});
-  const AllVehicles = Array.isArray(data?.content) ? data.content : [];
+  const { data: vehiclesData = [] } = useGetVehiclesQuery({});
+  const AllVehicles = Array.isArray(vehiclesData?.content)
+    ? vehiclesData.content
+    : [];
 
   const [createDriver] = useCreateDriverMutation();
   const [updateDriver] = useUpdateDriverMutation();
@@ -158,7 +150,7 @@ const AdminContent = () => {
     const searchValue = search.toLowerCase();
     return (
       driver.name?.toLowerCase().includes(searchValue) ||
-      driver.email?.toLowerCase().includes(searchValue) 
+      driver.email?.toLowerCase().includes(searchValue)
     );
   });
 
@@ -174,7 +166,7 @@ const AdminContent = () => {
     );
 
     const rows = filteredDrivers.map((driver: any) =>
-      headers.map((key) => {
+      headers.map((key: string) => {
         const value = driver[key];
         if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
         if (value === null || value === undefined) return "";
@@ -185,7 +177,7 @@ const AdminContent = () => {
 
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+      [headers.join(","), ...rows.map((r: string[]) => r.join(","))].join("\n");
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -197,9 +189,9 @@ const AdminContent = () => {
 
     toast.success("Exported to CSV!");
   };
+
   return (
     <Box sx={{ p: 3, bgcolor: "#121a26", color: "white", minHeight: "100vh" }}>
-      {/* Top filters */}
       <Box
         sx={{
           display: "flex",
@@ -261,7 +253,6 @@ const AdminContent = () => {
         </Box>
       </Box>
 
-      {/* Driver Table */}
       <TableContainer
         component={Paper}
         sx={{ bgcolor: "#1e2630", borderRadius: 2 }}
@@ -328,8 +319,9 @@ const AdminContent = () => {
                 {/* VEHICLE */}
                 <TableCell sx={{ color: "#9ea7b5" }}>
                   {driver?.vehicleUuid
-                    ? AllVehicles.find((v) => v.uuid === driver.vehicleUuid)
-                        ?.vehicleId || "Unassigned"
+                    ? AllVehicles.find(
+                        (v: any) => v.uuid === driver.vehicleUuid
+                      )?.vehicleId || "Unassigned"
                     : "Unassigned"}
                 </TableCell>
 
@@ -434,7 +426,6 @@ const AdminContent = () => {
         </Table>
       </TableContainer>
 
-      {/* ACTIONS MENU */}
       <Menu
         anchorEl={anchorEl}
         open={openMenu}
@@ -446,7 +437,6 @@ const AdminContent = () => {
         <DropdownItem onClick={handleEdit}>Edit</DropdownItem>
       </Menu>
 
-      {/* ADD / EDIT DIALOG */}
       <AddDriverDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
