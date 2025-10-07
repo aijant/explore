@@ -21,21 +21,16 @@ export const driverApi = createApi({
       query: (params = {}) => {
         const query = new URLSearchParams();
 
-        if (params.status !== undefined)
-          query.append("status", params.status.toString());
-        if (params.name) query.append("name", params.name);
-        if (params.email) query.append("email", params.email);
-        if (params.allowYardMove !== undefined)
-          query.append("allowYardMove", params.allowYardMove.toString());
-        if (params.allowPersonalConveyance !== undefined)
-          query.append(
-            "allowPersonalConveyance",
-            params.allowPersonalConveyance.toString()
-          );
-        if (params.page !== undefined)
-          query.append("page", params.page.toString());
-        if (params.size !== undefined)
-          query.append("size", params.size.toString());
+        query.append("status", params.status.toString());
+        query.append("name", params.name);
+        query.append("email", params.email);
+        query.append("allowYardMove", params.allowYardMove.toString());
+        query.append(
+          "allowPersonalConveyance",
+          params.allowPersonalConveyance.toString()
+        );
+        query.append("page", params.page.toString());
+        query.append("size", params.size.toString());
 
         return {
           url: `/api/drivers?${query.toString()}`,

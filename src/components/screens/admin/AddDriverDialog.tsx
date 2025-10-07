@@ -40,7 +40,7 @@ interface Props {
 }
 
 const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
-  const [form, setForm] = useState({
+  const initialFormState = {
     name: "",
     surname: "",
     dateOfBirth: "",
@@ -52,7 +52,6 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
     licenseIssuingState: "",
     licenseNumber: "",
     status: true,
-
     exemptFromEld: false,
     allowYardMove: false,
     allowPersonalConveyance: false,
@@ -63,16 +62,15 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
     requireDriverSignature: false,
     keepTrailer: false,
     keepShippingDocs: false,
-
     cycleRule: "USA_70_8",
     break30MinException: false,
     reset24h: false,
-  });
+  };
 
+  const [form, setForm] = useState(initialFormState);
   const [documents, setDocuments] = useState<DriverDocument[]>([]);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
   const [documentName, setDocumentName] = useState<DriverDocumentName | "">("");
   const [customName, setCustomName] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
@@ -99,12 +97,27 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
     if (initialData) setForm((prev) => ({ ...prev, ...initialData }));
   }, [initialData]);
 
+  const resetAllFields = () => {
+    setForm(initialFormState);
+    setDocuments([]);
+    resetDocFields();
+    setEditingIndex(null);
+  };
+
   const handleChange = (e: any) => {
     const { name, type, value, checked } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  const resetDocFields = () => {
+    setDocumentName("");
+    setCustomName("");
+    setExpirationDate("");
+    setFile(null);
+    setEditingIndex(null);
   };
 
   const handleAddDocument = () => {
@@ -129,14 +142,6 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
     setDocumentDialogOpen(false);
   };
 
-  const resetDocFields = () => {
-    setDocumentName("");
-    setCustomName("");
-    setExpirationDate("");
-    setFile(null);
-    setEditingIndex(null);
-  };
-
   const handleEditDoc = (i: number) => {
     const d = documents[i];
     setDocumentName(d.documentName);
@@ -153,18 +158,24 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
   const handleSubmit = () => {
     const driver = { ...form };
     onConfirm({ driver, documents });
+    resetAllFields();
+    onClose();
+  };
+
+  const handleClose = () => {
+    resetAllFields();
     onClose();
   };
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle sx={{ bgcolor: "#121a26", color: "white" }}>
           {initialData ? "Edit Driver" : "Add Driver"}
         </DialogTitle>
 
         <DialogContent sx={{ bgcolor: "#121a26", color: "white" }}>
-          {/* Personal Info */}
+          {/* PERSONAL INFO */}
           <Typography sx={{ mb: 2, mt: 1 }}>PERSONAL INFO</Typography>
 
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
@@ -213,6 +224,7 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             />
           </Box>
 
+          {/* DRIVER TYPE */}
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel sx={{ color: "white" }}>Driver Type</InputLabel>
             <Select
@@ -229,6 +241,7 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             </Select>
           </FormControl>
 
+          {/* CONTACT INFO */}
           <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mt={2}>
             <TextField
               name="email"
@@ -246,7 +259,6 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
               InputLabelProps={{ sx: { color: "white" } }}
               inputProps={{ style: { color: "white", background: "#1e2630" } }}
             />
-
             <FormControl>
               <InputLabel sx={{ color: "white" }}>License State</InputLabel>
               <Select
@@ -262,7 +274,6 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
                 ))}
               </Select>
             </FormControl>
-
             <TextField
               name="licenseNumber"
               label="License Number"
@@ -273,7 +284,7 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             />
           </Box>
 
-          {/* ELD Options */}
+          {/* ELD OPTIONS */}
           <Typography sx={{ mt: 4, mb: 1 }}>ELD OPTIONS</Typography>
           {[
             "exemptFromEld",
@@ -301,7 +312,7 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             />
           ))}
 
-          {/* Cycle */}
+          {/* CYCLE */}
           <Typography sx={{ mt: 3, mb: 1 }}>CYCLE DETAILS</Typography>
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel sx={{ color: "white" }}>Cycle Rule</InputLabel>
@@ -330,7 +341,6 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             label="30 Minute Break Exception"
             sx={{ color: "white" }}
           />
-
           <FormControlLabel
             control={
               <Switch
@@ -343,7 +353,7 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
             sx={{ color: "white" }}
           />
 
-          {/* Documents */}
+          {/* DOCUMENTS */}
           <Typography sx={{ mt: 3, mb: 1 }}>DOCUMENTS</Typography>
           {documents.map((d, i) => (
             <Box
@@ -393,7 +403,7 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
         </DialogContent>
 
         <DialogActions sx={{ bgcolor: "#121a26" }}>
-          <Button onClick={onClose} sx={{ color: "#888" }}>
+          <Button onClick={handleClose} sx={{ color: "#888" }}>
             Cancel
           </Button>
           <Button
@@ -406,10 +416,13 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
         </DialogActions>
       </Dialog>
 
-      {/* Document sub-dialog */}
+      {/* DOCUMENT SUB-DIALOG */}
       <Dialog
         open={documentDialogOpen}
-        onClose={() => setDocumentDialogOpen(false)}
+        onClose={() => {
+          resetDocFields();
+          setDocumentDialogOpen(false);
+        }}
       >
         <DialogTitle sx={{ bgcolor: "#121a26", color: "white" }}>
           {editingIndex !== null ? "Edit Document" : "Add Driver Document"}
@@ -472,7 +485,10 @@ const AddDriverDialog = ({ open, onClose, onConfirm, initialData }: Props) => {
         </DialogContent>
         <DialogActions sx={{ bgcolor: "#121a26" }}>
           <Button
-            onClick={() => setDocumentDialogOpen(false)}
+            onClick={() => {
+              resetDocFields();
+              setDocumentDialogOpen(false);
+            }}
             sx={{ color: "#888" }}
           >
             Cancel
