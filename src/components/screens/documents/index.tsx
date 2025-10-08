@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Table,
@@ -21,16 +21,15 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { DocumentType } from "@store/models/enums/general.enums";
-
+import { useGetVehiclesQuery } from "@store/services/vehicles.service";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-
 import {
-  useGetDocumentsQuery,
   useCreateDocumentMutation,
-} from "@store/services/documents.service";
-
+  documentsApi,
+} from "@store/services/documents.service"; 
+import store  from "@store/index"; 
 import toast from "react-hot-toast";
 import AddDocumentDialog from "./AddDocumentDialog";
 
@@ -39,18 +38,46 @@ const DocumentsContent = () => {
   const [toDate, setToDate] = useState<Date | null>(null);
   const [vehicleFilter, setVehicleFilter] = useState("All");
   const [typeFilter, setTypeFilter] = useState("All");
-  const [userUuid, setUserUuid] = useState<string | null>(null);
+  const [documentsData, setDocumentsData] = useState<any[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [loadingDocs, setLoadingDocs] = useState(false);
 
-  const {
-    data: documentsData = [],
-    isFetching,
-    refetch,
-  } = useGetDocumentsQuery(
-    userUuid ? userUuid : "21e7be79-b551-45c3-946b-1631622bc799"
-  );
+  const { data: vehiclesData = [] } = useGetVehiclesQuery({});
+  const AllVehicles = Array.isArray(vehiclesData?.content)
+    ? vehiclesData.content
+    : [];
 
   const [createDocument] = useCreateDocumentMutation();
-  const [dialogOpen, setDialogOpen] = useState(false);
+
+  //Fetch documents for each vehicle UUID individually (parallel)
+  useEffect(() => {
+    const fetchAllDocuments = async () => {
+      if (AllVehicles.length === 0) return;
+
+      setLoadingDocs(true);
+      try {
+        const promises = AllVehicles.map((v: any) =>
+          store
+            .dispatch(documentsApi.endpoints.getDocuments.initiate(v.uuid))
+            .unwrap()
+            .catch((err: any) => {
+              console.error(`Error fetching documents for ${v.uuid}:`, err);
+              return { content: [] };
+            })
+        );
+
+        const results = await Promise.all(promises);
+        const allDocs = results.flatMap((r: any) => r?.content || []);
+        setDocumentsData(allDocs);
+      } catch (err) {
+        console.error("Error fetching all documents:", err);
+      } finally {
+        setLoadingDocs(false);
+      }
+    };
+
+    fetchAllDocuments();
+  }, [AllVehicles]);
 
   const handleAddDocument = async (docData: any) => {
     try {
@@ -70,8 +97,6 @@ const DocumentsContent = () => {
 
       await createDocument(formData).unwrap();
       toast.success("Document successfully saved!");
-
-      setUserUuid(docData.userUuid);
       setDialogOpen(false);
     } catch (err: any) {
       toast.error("Error saving document!");
@@ -84,8 +109,37 @@ const DocumentsContent = () => {
     setToDate(null);
     setVehicleFilter("All");
     setTypeFilter("All");
-    refetch(); 
+    // Refetch all
+    const fetchAgain = async () => {
+      setDocumentsData([]);
+      const promises = AllVehicles.map((v: any) =>
+        store
+          .dispatch(documentsApi.endpoints.getDocuments.initiate(v.uuid))
+          .unwrap()
+          .catch(() => ({ content: [] }))
+      );
+      const results = await Promise.all(promises);
+      setDocumentsData(results.flatMap((r: any) => r?.content || []));
+    };
+    fetchAgain();
   };
+
+  const filteredDocs = documentsData
+    ?.filter((doc: any) =>
+      typeFilter === "All" ? true : doc.type === typeFilter
+    )
+    ?.filter((doc: any) =>
+      vehicleFilter === "All" ? true : doc.vehicle === vehicleFilter
+    )
+    ?.filter((doc: any) => {
+      const docDate = new Date(doc.date).setHours(0, 0, 0, 0);
+      const from = fromDate ? new Date(fromDate).setHours(0, 0, 0, 0) : null;
+      const to = toDate ? new Date(toDate).setHours(23, 59, 59, 999) : null;
+      if (from && to) return docDate >= from && docDate <= to;
+      if (from) return docDate >= from;
+      if (to) return docDate <= to;
+      return true;
+    });
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -194,25 +248,6 @@ const DocumentsContent = () => {
               onConfirm={handleAddDocument}
             />
 
-            <Button
-              variant="outlined"
-              sx={{
-                color: "#1669f2",
-                borderColor: "#1669f2",
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: 13,
-                minWidth: 110,
-                height: 38,
-                "&:hover": {
-                  bgcolor: "#1669f230",
-                  borderColor: "#1669f2",
-                },
-              }}
-            >
-              Export
-            </Button>
-            
             <IconButton
               sx={{ color: "white", mb: "14px" }}
               onClick={handleRefresh}
@@ -245,29 +280,16 @@ const DocumentsContent = () => {
                 ))}
               </TableRow>
             </TableHead>
-            <TableBody>
-              {documentsData?.content
-                ?.filter((doc: any) =>
-                  typeFilter === "All" ? true : doc.type === typeFilter
-                )
-                ?.filter((doc: any) =>
-                  vehicleFilter === "All" ? true : doc.vehicle === vehicleFilter
-                )
-                ?.filter((doc: any) => {
-                  const docDate = new Date(doc.date).setHours(0, 0, 0, 0);
-                  const from = fromDate
-                    ? new Date(fromDate).setHours(0, 0, 0, 0)
-                    : null;
-                  const to = toDate
-                    ? new Date(toDate).setHours(23, 59, 59, 999)
-                    : null;
 
-                  if (from && to) return docDate >= from && docDate <= to;
-                  if (from) return docDate >= from;
-                  if (to) return docDate <= to;
-                  return true;
-                })
-                .map((doc: any) => (
+            <TableBody>
+              {loadingDocs ? (
+                <TableRow>
+                  <TableCell colSpan={9} align="center" sx={{ color: "white" }}>
+                    Loading documents...
+                  </TableCell>
+                </TableRow>
+              ) : filteredDocs.length > 0 ? (
+                filteredDocs.map((doc: any) => (
                   <TableRow key={doc.id}>
                     <TableCell sx={{ color: "white" }}>
                       {new Date(doc.date).toLocaleString()}
@@ -276,7 +298,12 @@ const DocumentsContent = () => {
                       {DocumentType[doc.type as keyof typeof DocumentType] ||
                         doc.type}
                     </TableCell>
-                    <TableCell sx={{ color: "white" }}>{doc.vehicle}</TableCell>
+                    <TableCell sx={{ color: "white" }}>
+                      {doc?.userUuid
+                        ? AllVehicles.find((v: any) => v.uuid === doc.userUuid)
+                            ?.vehicleId || "Unassigned"
+                        : "Unassigned"}
+                    </TableCell>
                     <TableCell sx={{ color: "white" }}>
                       {doc.reference}
                     </TableCell>
@@ -296,14 +323,11 @@ const DocumentsContent = () => {
                       </IconButton>
                     </TableCell>
                   </TableRow>
-                ))}
-
-              {documentsData?.content?.length === 0 && (
+                ))
+              ) : (
                 <TableRow>
                   <TableCell colSpan={9} align="center" sx={{ color: "white" }}>
-                    {isFetching
-                      ? "Loading documents..."
-                      : "No documents found."}
+                    No documents found.
                   </TableCell>
                 </TableRow>
               )}
