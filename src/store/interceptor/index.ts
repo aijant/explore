@@ -21,7 +21,6 @@ const baseQuery = fetchBaseQuery({
 
     const token = (api.getState() as RootState).auth.accessToken;
 
-    console.log("token", token);
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
