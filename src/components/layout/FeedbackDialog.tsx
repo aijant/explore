@@ -12,6 +12,7 @@ import {
   Alert,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { AlertColor } from "@mui/material/Alert";
 import { useCreateFeedbackMutation } from "@/store/services/feedback.service";
 import { useGetDriverQuery } from "@store/services/driver.service";
 
@@ -20,10 +21,21 @@ interface FeedbackDialogProps {
   onClose: () => void;
 }
 
+interface Driver {
+  uuid: string;
+  name?: string;
+  surname?: string;
+  email: string;
+}
+
 const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onClose }) => {
   const [feedback, setFeedback] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
-  const [snackbar, setSnackbar] = useState({
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: AlertColor;
+  }>({
     open: false,
     message: "",
     severity: "success",
@@ -33,7 +45,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onClose }) => {
 
   const [createFeedback] = useCreateFeedbackMutation();
   const { data: driversData } = useGetDriverQuery({});
-  const drivers = driversData?.content || [];
+  const drivers: Driver[] = driversData?.content || [];
 
   const handleAttachImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -49,8 +61,12 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onClose }) => {
   const handleSend = async () => {
     try {
       if (!user) throw new Error("User data not found");
+
       const matchedDriver = drivers.find(
-        (driver) => driver.email === user.email
+        (driver: Driver) =>
+          driver.email === user.email &&
+          (!user.name || driver.name === user.name) &&
+          (!user.surname || driver.surname === user.surname)
       );
 
       if (!matchedDriver) {

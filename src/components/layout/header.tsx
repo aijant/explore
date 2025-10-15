@@ -14,7 +14,6 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  Stack,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -22,7 +21,6 @@ import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import CloseIcon from "@mui/icons-material/Close";
 import FeedbackDialog from "./FeedbackDialog";
 
 import useSignOut from "@hooks/useSignOut";
@@ -46,7 +44,6 @@ const Header: FC = () => {
   const [accountAnchorEl, setAccountAnchorEl] = useState<null | HTMLElement>(
     null
   );
-  const [addAnchorEl, setAddAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
   const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);

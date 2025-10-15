@@ -4,6 +4,7 @@ import { baseQueryWithReauth } from "../interceptor";
 export const feedbackApi = createApi({
   reducerPath: "feedbackApi",
   baseQuery: baseQueryWithReauth,
+  tagTypes: ["feedback"],
   endpoints: (builder) => ({
     createFeedback: builder.mutation<any, FormData>({
       query: (body) => ({
