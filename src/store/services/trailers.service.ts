@@ -17,12 +17,9 @@ export const trailersApi = createApi({
     >({
       query: (params = {}) => {
         const query = new URLSearchParams();
-
-        if (params.trailerId) query.append("trailerId", params.trailerId);
-        if (params.page !== undefined)
-          query.append("page", params.page.toString());
-        if (params.size !== undefined)
-          query.append("size", params.size.toString());
+        query.append("trailerId", params.trailerId);
+        query.append("page", params.page.toString());
+        query.append("size", params.size.toString());
 
         return {
           url: `/api/trailers?status=&${query.toString()}`,
