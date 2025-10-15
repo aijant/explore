@@ -14,6 +14,7 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  Stack,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -21,6 +22,9 @@ import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import CloseIcon from "@mui/icons-material/Close";
+import FeedbackDialog from "./FeedbackDialog";
+
 import useSignOut from "@hooks/useSignOut";
 import { isExpiringSoon } from "@/store/interceptor/token";
 import { useChangePasswordMutation } from "@/store/services/account.service";
@@ -46,8 +50,12 @@ const Header: FC = () => {
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
   const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
+  const [subSettingsAnchorEl, setSubSettingsAnchorEl] =
+    useState<null | HTMLElement>(null);
+
   const [selectedGroup, setSelectedGroup] = useState("All Groups");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -72,12 +80,7 @@ const Header: FC = () => {
   const handleAccountMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
     setAccountAnchorEl(event.currentTarget);
   const handleAccountMenuClose = () => setAccountAnchorEl(null);
-  const handleAddMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
-    setAddAnchorEl(event.currentTarget);
-  const handleAddMenuClose = () => setAddAnchorEl(null);
-  const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) =>
-    setNotificationAnchorEl(event.currentTarget);
-  const handleNotificationClose = () => setNotificationAnchorEl(null);
+
   const handleGroupMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
     setGroupAnchorEl(event.currentTarget);
   const handleGroupMenuClose = () => setGroupAnchorEl(null);
@@ -87,9 +90,10 @@ const Header: FC = () => {
   };
 
   const handleOpenSettings = () => {
-    handleAccountMenuClose();
+    setSubSettingsAnchorEl(null);
     setSettingsOpen(true);
   };
+
   const handleCloseSettings = () => {
     setSettingsOpen(false);
     setErrors({ currentPassword: "", newPassword: "", repeatPassword: "" });
@@ -187,9 +191,6 @@ const Header: FC = () => {
   };
 
   const accountMenuOpen = Boolean(accountAnchorEl);
-  const addMenuOpen = Boolean(addAnchorEl);
-  const notificationsOpen = Boolean(notificationAnchorEl);
-  const groupMenuOpen = Boolean(groupAnchorEl);
 
   return (
     <>
@@ -213,7 +214,7 @@ const Header: FC = () => {
           </Button>
           <Menu
             anchorEl={groupAnchorEl}
-            open={groupMenuOpen}
+            open={Boolean(groupAnchorEl)}
             onClose={handleGroupMenuClose}
             PaperProps={{
               sx: {
@@ -237,7 +238,6 @@ const Header: FC = () => {
 
           <Button
             variant="outlined"
-            onClick={handleAddMenuOpen}
             sx={{
               color: "#1669f2",
               borderColor: "#1669f2",
@@ -247,34 +247,17 @@ const Header: FC = () => {
           >
             <AddIcon />
           </Button>
-          <Menu
-            anchorEl={addAnchorEl}
-            open={addMenuOpen}
-            onClose={handleAddMenuClose}
-            PaperProps={{
-              sx: {
-                backgroundColor: "#1f1f1f",
-                color: "white",
-                mt: 1,
-                minWidth: 180,
-              },
-            }}
-          >
-            <MenuItem>Add Driver</MenuItem>
-            <MenuItem>Add Vehicle</MenuItem>
-            <MenuItem>Add Trailer</MenuItem>
-            <MenuItem>Add Geofence</MenuItem>
-            <MenuItem>Add Alert</MenuItem>
-          </Menu>
 
-          {/* Notifications */}
-          <Button color="primary" onClick={handleNotificationClick}>
+          <Button
+            color="primary"
+            onClick={(e) => setNotificationAnchorEl(e.currentTarget)}
+          >
             <NotificationsIcon />
           </Button>
           <Popover
-            open={notificationsOpen}
+            open={Boolean(notificationAnchorEl)}
             anchorEl={notificationAnchorEl}
-            onClose={handleNotificationClose}
+            onClose={() => setNotificationAnchorEl(null)}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
             PaperProps={{
@@ -295,12 +278,10 @@ const Header: FC = () => {
             </Typography>
           </Popover>
 
-          {/* User Info */}
           <span className="text-[#fff]">
             {user?.id ? `${user.name} ${user.surname}` : "Test Admin"}
           </span>
 
-          {/* Account Menu */}
           <Button color="primary" onClick={handleAccountMenuOpen}>
             <AccountCircleIcon />
           </Button>
@@ -317,15 +298,47 @@ const Header: FC = () => {
               },
             }}
           >
-            <MenuItem onClick={handleOpenSettings}>Settings</MenuItem>
-            <MenuItem>What's New</MenuItem>
-            <MenuItem>Manual Instruction</MenuItem>
+            <MenuItem
+              onClick={(e) => {
+                handleAccountMenuClose();
+                setSubSettingsAnchorEl(e.currentTarget);
+              }}
+            >
+              Settings
+            </MenuItem>
             <MenuItem onClick={handleSignOut}>Logout</MenuItem>
           </Menu>
+
+          {/* Popover: Settings Submenu (Profile + Feedback) */}
+          <Popover
+            open={Boolean(subSettingsAnchorEl)}
+            anchorEl={subSettingsAnchorEl}
+            onClose={() => setSubSettingsAnchorEl(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            transformOrigin={{ vertical: "top", horizontal: "left" }}
+            PaperProps={{
+              sx: {
+                backgroundColor: "#1f1f1f",
+                color: "#fff",
+                mt: 1,
+                minWidth: 180,
+              },
+            }}
+          >
+            <MenuItem onClick={handleOpenSettings}>Profile</MenuItem>
+            <MenuItem
+              onClick={() => {
+                setSubSettingsAnchorEl(null);
+                setFeedbackDialogOpen(true);
+              }}
+            >
+              Send Feedback
+            </MenuItem>
+          </Popover>
         </div>
       </header>
 
-      {/* ================= SETTINGS DIALOG ================= */}
+      {/* Password Settings Dialog */}
       <Dialog
         open={settingsOpen}
         onClose={handleCloseSettings}
@@ -348,7 +361,6 @@ const Header: FC = () => {
               style: { color: "#fff", backgroundColor: "#1f1f1f" },
             }}
           />
-
           {[
             {
               label: "Current Password",
@@ -377,8 +389,8 @@ const Header: FC = () => {
           ].map((field, i) => (
             <TextField
               key={i}
-              required
               fullWidth
+              required
               label={field.label}
               type={field.show ? "text" : "password"}
               value={field.value}
@@ -407,8 +419,6 @@ const Header: FC = () => {
               }}
             />
           ))}
-
-          {/* Save Button */}
           <Button
             variant="contained"
             sx={{
@@ -439,6 +449,12 @@ const Header: FC = () => {
       >
         <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
+
+      {/* Feedback Dialog */}
+      <FeedbackDialog
+        open={feedbackDialogOpen}
+        onClose={() => setFeedbackDialogOpen(false)}
+      />
     </>
   );
 };

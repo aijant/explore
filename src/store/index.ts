@@ -6,6 +6,7 @@ import { vehiclesApi } from "./services/vehicles.service";
 import { trailersApi } from "./services/trailers.service";
 import { companyApi } from "./services/company.service";
 import { driverApi } from "./services/driver.service";
+import { feedbackApi } from "./services/feedback.service";
 import authSlice from "./slices/auth-slice";
 
 const store = configureStore({
@@ -16,6 +17,7 @@ const store = configureStore({
     [trailersApi.reducerPath]: trailersApi.reducer,
     [companyApi.reducerPath]: companyApi.reducer,
     [driverApi.reducerPath]: driverApi.reducer,
+    [feedbackApi.reducerPath]: feedbackApi.reducer,
     auth: authSlice,
   },
   middleware: (getDefaultMiddleware) =>
@@ -26,6 +28,7 @@ const store = configureStore({
       trailersApi.middleware,
       companyApi.middleware,
       driverApi.middleware,
+      feedbackApi.middleware,
     ]),
 });
 
