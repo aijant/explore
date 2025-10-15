@@ -1,27 +1,44 @@
 import React, { FC, useState } from "react";
-import { Button, Menu, MenuItem, Popover, Typography } from "@mui/material";
+import {
+  Button,
+  Menu,
+  MenuItem,
+  Popover,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import useSignOut from "@hooks/useSignOut";
 import { isExpiringSoon } from "@/store/interceptor/token";
+import { useChangePasswordMutation } from "@/store/services/account.service";
 
 const Header: FC = () => {
   const user = JSON.parse(localStorage.getItem("@auth") || "{}")?.user;
   const accessToken = JSON.parse(
     localStorage.getItem("@auth") || "{}"
   )?.accessToken;
-
   const { handleSignOut } = useSignOut();
 
-  // If token is expiring, sign out and return null to render nothing
   if (isExpiringSoon(accessToken)) {
     handleSignOut();
     return null;
   }
 
-  // States for menus and popovers
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
+
   const [accountAnchorEl, setAccountAnchorEl] = useState<null | HTMLElement>(
     null
   );
@@ -29,204 +46,400 @@ const Header: FC = () => {
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
   const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedGroup, setSelectedGroup] = useState<string>("All Groups");
+  const [selectedGroup, setSelectedGroup] = useState("All Groups");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Boolean open states
-  const accountMenuOpen = Boolean(accountAnchorEl);
-  const addMenuOpen = Boolean(addAnchorEl);
-  const notificationsOpen = Boolean(notificationAnchorEl);
-  const groupMenuOpen = Boolean(groupAnchorEl);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
 
-  // Handlers
-  const handleAccountMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+  const [errors, setErrors] = useState({
+    currentPassword: "",
+    newPassword: "",
+    repeatPassword: "",
+  });
+
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showRepeat, setShowRepeat] = useState(false);
+
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
+
+  const handleAccountMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
     setAccountAnchorEl(event.currentTarget);
-  };
-  const handleAccountMenuClose = () => {
-    setAccountAnchorEl(null);
-  };
-
-  const handleAddMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+  const handleAccountMenuClose = () => setAccountAnchorEl(null);
+  const handleAddMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
     setAddAnchorEl(event.currentTarget);
-  };
-  const handleAddMenuClose = () => {
-    setAddAnchorEl(null);
-  };
-
-  const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleAddMenuClose = () => setAddAnchorEl(null);
+  const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) =>
     setNotificationAnchorEl(event.currentTarget);
-  };
-  const handleNotificationClose = () => {
-    setNotificationAnchorEl(null);
-  };
-
-  const handleGroupMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+  const handleNotificationClose = () => setNotificationAnchorEl(null);
+  const handleGroupMenuOpen = (event: React.MouseEvent<HTMLElement>) =>
     setGroupAnchorEl(event.currentTarget);
-  };
-  const handleGroupMenuClose = () => {
-    setGroupAnchorEl(null);
-  };
-
+  const handleGroupMenuClose = () => setGroupAnchorEl(null);
   const handleGroupSelect = (group: string) => {
     setSelectedGroup(group);
     handleGroupMenuClose();
   };
 
+  const handleOpenSettings = () => {
+    handleAccountMenuClose();
+    setSettingsOpen(true);
+  };
+  const handleCloseSettings = () => {
+    setSettingsOpen(false);
+    setErrors({ currentPassword: "", newPassword: "", repeatPassword: "" });
+  };
+
+  const validate = () => {
+    const newErrors = {
+      currentPassword: "",
+      newPassword: "",
+      repeatPassword: "",
+    };
+    let isValid = true;
+
+    if (!currentPassword.trim()) {
+      newErrors.currentPassword = "Current password is required";
+      isValid = false;
+    }
+    if (!newPassword.trim()) {
+      newErrors.newPassword = "New password is required";
+      isValid = false;
+    } else if (newPassword.length < 6) {
+      newErrors.newPassword = "Password must be at least 6 characters";
+      isValid = false;
+    }
+    if (!repeatPassword.trim()) {
+      newErrors.repeatPassword = "Please repeat new password";
+      isValid = false;
+    } else if (newPassword !== repeatPassword) {
+      newErrors.repeatPassword = "Passwords do not match";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSaveProfile = async () => {
+    if (!validate()) return;
+
+    try {
+      await changePassword({
+        oldPassword: currentPassword,
+        newPassword,
+        newPassword2: repeatPassword,
+      }).unwrap();
+
+      setSnackbar({
+        open: true,
+        message: "Password changed successfully",
+        severity: "success",
+      });
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setRepeatPassword("");
+      setSettingsOpen(false);
+    } catch (error: any) {
+      if (error?.originalStatus === 200) {
+        let message = "Password changed successfully";
+
+        if (typeof error?.data === "string") {
+          message = error.data;
+        } else if (error?.data?.message) {
+          message = error.data.message;
+        }
+
+        setSnackbar({
+          open: true,
+          message,
+          severity: "success",
+        });
+
+        setCurrentPassword("");
+        setNewPassword("");
+        setRepeatPassword("");
+        setSettingsOpen(false);
+        return;
+      }
+
+      let errorMessage = "Failed to change password";
+      if (error?.data) {
+        if (typeof error.data === "string") {
+          errorMessage = error.data;
+        } else if (error.data.message) {
+          errorMessage = error.data.message;
+        }
+      }
+
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: "error",
+      });
+    }
+  };
+
+  const accountMenuOpen = Boolean(accountAnchorEl);
+  const addMenuOpen = Boolean(addAnchorEl);
+  const notificationsOpen = Boolean(notificationAnchorEl);
+  const groupMenuOpen = Boolean(groupAnchorEl);
+
   return (
-    <header className="h-[65px] flex items-center justify-between px-6 text-white border-b border-[#ffffff1a] bg-[#121212]">
-      <div className="flex items-center">
-        {/* You can add a logo or navigation here if needed */}
-      </div>
-
-      <div className="flex items-center gap-[8px]">
-        {/* Group Selector */}
-        <Button
-          onClick={handleGroupMenuOpen}
-          endIcon={<ArrowDropDownIcon />}
-          sx={{
-            color: "white",
-            border: "1px solid #333",
-            backgroundColor: "#1f1f1f",
-            textTransform: "none",
-            px: 2,
-            py: 1,
-            "&:hover": {
-              backgroundColor: "#2a2a2a",
-            },
-          }}
-        >
-          {selectedGroup}
-        </Button>
-        <Menu
-          anchorEl={groupAnchorEl}
-          open={groupMenuOpen}
-          onClose={handleGroupMenuClose}
-          PaperProps={{
-            sx: {
-              backgroundColor: "#1f1f1f",
+    <>
+      <header className="h-[65px] flex items-center justify-between px-6 text-white border-b border-[#ffffff1a] bg-[#121212]">
+        <div />
+        <div className="flex items-center gap-[8px]">
+          <Button
+            onClick={handleGroupMenuOpen}
+            endIcon={<ArrowDropDownIcon />}
+            sx={{
               color: "white",
-              mt: 1,
-              minWidth: 160,
-            },
-          }}
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          transformOrigin={{ vertical: "top", horizontal: "left" }}
-        >
-          <MenuItem onClick={() => handleGroupSelect("All Groups")}>
-            All Groups
-          </MenuItem>
-          <MenuItem onClick={() => handleGroupSelect("Group 1")}>
-            Group 1
-          </MenuItem>
-          <MenuItem onClick={() => handleGroupSelect("Group 2")}>
-            Group 2
-          </MenuItem>
-        </Menu>
+              border: "1px solid #333",
+              backgroundColor: "#1f1f1f",
+              textTransform: "none",
+              px: 2,
+              py: 1,
+              "&:hover": { backgroundColor: "#2a2a2a" },
+            }}
+          >
+            {selectedGroup}
+          </Button>
+          <Menu
+            anchorEl={groupAnchorEl}
+            open={groupMenuOpen}
+            onClose={handleGroupMenuClose}
+            PaperProps={{
+              sx: {
+                backgroundColor: "#1f1f1f",
+                color: "white",
+                mt: 1,
+                minWidth: 160,
+              },
+            }}
+          >
+            <MenuItem onClick={() => handleGroupSelect("All Groups")}>
+              All Groups
+            </MenuItem>
+            <MenuItem onClick={() => handleGroupSelect("Group 1")}>
+              Group 1
+            </MenuItem>
+            <MenuItem onClick={() => handleGroupSelect("Group 2")}>
+              Group 2
+            </MenuItem>
+          </Menu>
 
-        {/* Add Button and Menu */}
-        <Button
-          variant="outlined"
-          onClick={handleAddMenuOpen}
-          sx={{
-            color: "#1669f2",
-            borderColor: "#1669f2",
-            minWidth: 50,
-            "&:hover": {
-              bgcolor: "#1669f230",
+          <Button
+            variant="outlined"
+            onClick={handleAddMenuOpen}
+            sx={{
+              color: "#1669f2",
               borderColor: "#1669f2",
-            },
-          }}
-        >
-          <AddIcon />
-        </Button>
-        <Menu
-          anchorEl={addAnchorEl}
-          open={addMenuOpen}
-          onClose={handleAddMenuClose}
-          PaperProps={{
-            sx: {
-              backgroundColor: "#1f1f1f",
-              color: "white",
-              mt: 1,
-              minWidth: 180,
-            },
-          }}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <MenuItem onClick={handleAddMenuClose}>Add Driver</MenuItem>
-          <MenuItem onClick={handleAddMenuClose}>Add Vehicle</MenuItem>
-          <MenuItem onClick={handleAddMenuClose}>Add Trailer</MenuItem>
-          <MenuItem onClick={handleAddMenuClose}>Add Geofence</MenuItem>
-          <MenuItem onClick={handleAddMenuClose}>Add Alert</MenuItem>
-        </Menu>
+              minWidth: 50,
+              "&:hover": { bgcolor: "#1669f230", borderColor: "#1669f2" },
+            }}
+          >
+            <AddIcon />
+          </Button>
+          <Menu
+            anchorEl={addAnchorEl}
+            open={addMenuOpen}
+            onClose={handleAddMenuClose}
+            PaperProps={{
+              sx: {
+                backgroundColor: "#1f1f1f",
+                color: "white",
+                mt: 1,
+                minWidth: 180,
+              },
+            }}
+          >
+            <MenuItem>Add Driver</MenuItem>
+            <MenuItem>Add Vehicle</MenuItem>
+            <MenuItem>Add Trailer</MenuItem>
+            <MenuItem>Add Geofence</MenuItem>
+            <MenuItem>Add Alert</MenuItem>
+          </Menu>
 
-        {/* Notifications */}
-        <Button color="primary" onClick={handleNotificationClick}>
-          <NotificationsIcon />
-        </Button>
-        <Popover
-          open={notificationsOpen}
-          anchorEl={notificationAnchorEl}
-          onClose={handleNotificationClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-          PaperProps={{
-            sx: {
-              backgroundColor: "#1f1f1f",
-              color: "white",
-              p: 2,
-              width: 300,
-              boxShadow: "0px 4px 20px rgba(0,0,0,0.5)",
-            },
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Notifications
-          </Typography>
-          <div style={{ minHeight: 150 }}>
+          {/* Notifications */}
+          <Button color="primary" onClick={handleNotificationClick}>
+            <NotificationsIcon />
+          </Button>
+          <Popover
+            open={notificationsOpen}
+            anchorEl={notificationAnchorEl}
+            onClose={handleNotificationClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            PaperProps={{
+              sx: {
+                backgroundColor: "#1f1f1f",
+                color: "white",
+                p: 2,
+                width: 300,
+                boxShadow: "0px 4px 20px rgba(0,0,0,0.5)",
+              },
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Notifications
+            </Typography>
             <Typography variant="body2" color="gray">
               No new notifications.
             </Typography>
-          </div>
-        </Popover>
+          </Popover>
 
-        {/* User Info */}
-        {user?.id ? (
+          {/* User Info */}
           <span className="text-[#fff]">
-            {user.name} {user.surname}
+            {user?.id ? `${user.name} ${user.surname}` : "Test Admin"}
           </span>
-        ) : (
-          <span className="text-[#fff]">Test Admin</span>
-        )}
 
-        {/* Account Menu */}
-        <Button color="primary" onClick={handleAccountMenuOpen}>
-          <AccountCircleIcon />
-        </Button>
-        <Menu
-          anchorEl={accountAnchorEl}
-          open={accountMenuOpen}
-          onClose={handleAccountMenuClose}
-          PaperProps={{
-            sx: {
-              backgroundColor: "#1f1f1f",
-              color: "white",
-              mt: 1,
-              minWidth: 180,
+          {/* Account Menu */}
+          <Button color="primary" onClick={handleAccountMenuOpen}>
+            <AccountCircleIcon />
+          </Button>
+          <Menu
+            anchorEl={accountAnchorEl}
+            open={accountMenuOpen}
+            onClose={handleAccountMenuClose}
+            PaperProps={{
+              sx: {
+                backgroundColor: "#1f1f1f",
+                color: "white",
+                mt: 1,
+                minWidth: 180,
+              },
+            }}
+          >
+            <MenuItem onClick={handleOpenSettings}>Settings</MenuItem>
+            <MenuItem>What's New</MenuItem>
+            <MenuItem>Manual Instruction</MenuItem>
+            <MenuItem onClick={handleSignOut}>Logout</MenuItem>
+          </Menu>
+        </div>
+      </header>
+
+      {/* ================= SETTINGS DIALOG ================= */}
+      <Dialog
+        open={settingsOpen}
+        onClose={handleCloseSettings}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ backgroundColor: "#121212", color: "#fff" }}>
+          Profile
+        </DialogTitle>
+        <DialogContent sx={{ backgroundColor: "#121212", color: "#fff", p: 3 }}>
+          <TextField
+            fullWidth
+            label="Email"
+            value={user?.email || ""}
+            disabled
+            margin="normal"
+            variant="outlined"
+            InputLabelProps={{ style: { color: "#999" } }}
+            InputProps={{
+              style: { color: "#fff", backgroundColor: "#1f1f1f" },
+            }}
+          />
+
+          {[
+            {
+              label: "Current Password",
+              value: currentPassword,
+              setValue: setCurrentPassword,
+              error: errors.currentPassword,
+              show: showCurrent,
+              setShow: setShowCurrent,
             },
-          }}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <MenuItem onClick={handleAccountMenuClose}>Settings</MenuItem>
-          <MenuItem onClick={handleAccountMenuClose}>What's New</MenuItem>
-          <MenuItem onClick={handleAccountMenuClose}>
-            Manual Instruction
-          </MenuItem>
-          <MenuItem onClick={handleSignOut}>Logout</MenuItem>
-        </Menu>
-      </div>
-    </header>
+            {
+              label: "New Password",
+              value: newPassword,
+              setValue: setNewPassword,
+              error: errors.newPassword,
+              show: showNew,
+              setShow: setShowNew,
+            },
+            {
+              label: "Repeat New Password",
+              value: repeatPassword,
+              setValue: setRepeatPassword,
+              error: errors.repeatPassword,
+              show: showRepeat,
+              setShow: setShowRepeat,
+            },
+          ].map((field, i) => (
+            <TextField
+              key={i}
+              required
+              fullWidth
+              label={field.label}
+              type={field.show ? "text" : "password"}
+              value={field.value}
+              onChange={(e) => field.setValue(e.target.value)}
+              error={!!field.error}
+              helperText={field.error}
+              margin="normal"
+              variant="outlined"
+              InputLabelProps={{ style: { color: "#999" } }}
+              InputProps={{
+                style: { color: "#fff", backgroundColor: "#1f1f1f" },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => field.setShow(!field.show)}
+                      edge="end"
+                    >
+                      {field.show ? (
+                        <VisibilityIcon sx={{ color: "#777" }} />
+                      ) : (
+                        <VisibilityOffIcon sx={{ color: "#777" }} />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          ))}
+
+          {/* Save Button */}
+          <Button
+            variant="contained"
+            sx={{
+              mt: 2,
+              backgroundColor: "#1669f2",
+              color: "#fff",
+              "&:hover": { backgroundColor: "#1669f2cc" },
+            }}
+            fullWidth
+            onClick={handleSaveProfile}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <CircularProgress size={24} sx={{ color: "#fff" }} />
+            ) : (
+              "Save Profile"
+            )}
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+      </Snackbar>
+    </>
   );
 };
 
