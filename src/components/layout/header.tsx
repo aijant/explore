@@ -342,20 +342,19 @@ const Header: FC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle sx={{ backgroundColor: "#121212", color: "#fff" }}>
+        <DialogTitle sx={{ backgroundColor: "#121a26", color: "#fff" }}>
           Profile
         </DialogTitle>
-        <DialogContent sx={{ backgroundColor: "#121212", color: "#fff", p: 3 }}>
+        <DialogContent sx={{ backgroundColor: "#121a26", color: "#fff", p: 3 }}>
           <TextField
             fullWidth
             label="Email"
             value={user?.email || ""}
-            disabled
             margin="normal"
             variant="outlined"
             InputLabelProps={{ style: { color: "#999" } }}
             InputProps={{
-              style: { color: "#fff", backgroundColor: "#1f1f1f" },
+              style: { color: "#fff", backgroundColor: "#1e2630" },
             }}
           />
           {[
@@ -398,7 +397,7 @@ const Header: FC = () => {
               variant="outlined"
               InputLabelProps={{ style: { color: "#999" } }}
               InputProps={{
-                style: { color: "#fff", backgroundColor: "#1f1f1f" },
+                style: { color: "#fff", backgroundColor: "#1e2630" },
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton

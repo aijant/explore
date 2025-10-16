@@ -118,7 +118,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onClose }) => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            backgroundColor: "#121212",
+            backgroundColor: "#121a26",
             color: "#fff",
           }}
         >
@@ -128,7 +128,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onClose }) => {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ backgroundColor: "#121212", color: "#fff", p: 3 }}>
+        <DialogContent sx={{ backgroundColor: "#121a26", color: "#fff", p: 3 }}>
           <Typography variant="body2" sx={{ mb: 1 }}>
             Please provide your feedback.
           </Typography>
@@ -141,7 +141,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ open, onClose }) => {
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
             sx={{
-              backgroundColor: "#1f1f1f",
+              backgroundColor: "#1e2630",
               "& .MuiInputBase-input": { color: "#fff" },
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "#333" },
               "& .MuiInputLabel-root": { color: "#aaa" },
